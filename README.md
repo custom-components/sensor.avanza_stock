@@ -14,19 +14,53 @@ key | type | description
 **platform (Required)** | string | `avanza_stock`
 **stock (Required)** | number | The stock id, see below how to find it.
 **name (Optional)** | string | Custom name for the sensor. Default `avanza_stock_{stock}`.
+**monitored_conditions (Optional)** | list | Defines the attributes of the sensor, see below.
 
-### Attributes
-The sensor has the following attributes. 
-* name
-* id
-* highestPrice
-* lowestPrice
+### Monitored conditions
+The following attributes are tracked by default
 * change
 * changePercent
-* totalVolumeTraded
-* totalValueTraded
+* name
 
-There are many more available attributes, check source code, which can be added uppon request. In a future implementation all attributes will be available and it will be possible to configure which ones to track.
+Full list of available attributes.
+* brokerTradeSummary
+* change
+* changePercent
+* country
+* currency
+* flagCode
+* hasInvestmentFees
+* highestPrice
+* id
+* isin
+* lastPrice
+* lastPriceUpdated
+* loanFactor
+* lowestPrice
+* marketList
+* marketMakerExpected
+* marketPlace
+* marketTrades
+* morningStarFactSheetUrl
+* name
+* numberOfOwners
+* orderDepthReceivedTime
+* priceAtStartOfYear
+* priceFiveYearsAgo
+* priceOneMonthAgo
+* priceOneWeekAgo
+* priceOneYearAgo
+* priceSixMonthsAgo
+* priceThreeMonthsAgo
+* priceThreeYearsAgo
+* pushPermitted
+* quoteUpdated
+* shortSellable
+* superLoan
+* tickerSymbol
+* totalValueTraded
+* totalVolumeTraded
+* tradable
 
 ### Finding stock id
 Got to [Avanza](https://www.avanza.se) and search for the stock you want to track. In the resulting url there is a number, this is the stock id needed for the configuration. Even though it is a Swedish bank it is possible to find stocks from the following countries:
@@ -44,19 +78,22 @@ Got to [Avanza](https://www.avanza.se) and search for the stock you want to trac
 * Germany
 
 ## Example
-**Configuration with default name:**
+**Configuration with default settings:**
 ```yaml
 sensor:
   - platform: avanza_stock
     stock: 5361
 ```
 
-**Configuration with custom name:**
+**Configuration with custom settings:**
 ```yaml
 sensor:
   - platform: avanza_stock
-    stock: 5361
     name: Avanza Bank Holding
+    stock: 5361
+    monitored_conditions:
+      - totalVolumeTraded
+      - totalValueTraded
 ```
 
 ## Usage
@@ -88,4 +125,5 @@ sensor:
 Note: This automation could be further improved by looping over all sensors and checking if their entity_id starts with `sensor.avanza_stock_` and then extract the information.
 
 ## Changelog
+* 0.0.2 - Configure monitored conditions
 * 0.0.1 - Initial version

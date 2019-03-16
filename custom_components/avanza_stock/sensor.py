@@ -1,20 +1,8 @@
 """
 Support for getting stock data from avanza.se.
 
-Data is fetched from https://www.avanza.se/_mobile/market/stock/{STOCK}
-
-Example configuration
-
-sensor:
-  - platform: avanza
-    stock: 1000
-
-Example advanced configuration
-
-sensor:
-  - platform: avanza
-    name: Home Assistant Inc.
-    stock: 1000
+For more details about this platform, please refer to the documentation at
+https://github.com/claha/sensor.avanza_stock/blob/master/README.md
 """
 import logging
 from datetime import timedelta
@@ -23,10 +11,11 @@ import homeassistant.helpers.config_validation as cv
 import requests
 import voluptuous as vol
 from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.const import CONF_NAME
+from homeassistant.const import (
+    CONF_NAME, CONF_MONITORED_CONDITIONS)
 from homeassistant.helpers.entity import Entity
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -37,58 +26,67 @@ CONF_STOCK = 'stock'
 SCAN_INTERVAL = timedelta(minutes=60)
 
 MONITORED_CONDITIONS = [
-    # 'priceOneYearAgo',
-    # 'priceOneWeekAgo',
-    # 'priceOneMonthAgo',
-    # 'priceSixMonthsAgo',
-    # 'priceAtStartOfYear',
-    # 'priceThreeYearsAgo',
-    # 'priceFiveYearsAgo',
-    # 'priceThreeMonthsAgo',
-    # 'marketPlace',
-    # 'marketList',
-    # 'morningStarFactSheetUrl',
-    'name',
-    'id',
-    # 'country',
-    # 'currency',
-    # 'isin',
-    # 'tradable',
-    'highestPrice',
-    'lowestPrice',
-    # 'lastPrice',
-    # 'lastPriceUpdated',
+    # 'annualMeetings',
+    'brokerTradeSummary',
     'change',
     'changePercent',
-    'totalVolumeTraded',
-    'totalValueTraded',
-    # 'shortSellable',
-    # 'loanFactor',
-    # 'tickerSymbol',
-    # 'flagCode',
-    # 'quoteUpdated',
-    # 'hasInvestmentFees',
-    # 'keyRatios',
-    # 'numberOfOwners',
-    # 'superLoan',
-    # 'pushPermitted',
-    # 'dividends',
-    # 'relatedStocks',
     # 'company',
-    # 'orderDepthLevels',
-    # 'marketMakerExpected',
-    # 'orderDepthReceivedTime',
-    # 'latestTrades',
-    # 'marketTrades',
-    # 'annualMeetings',
-    # 'companyReports',
-    # 'brokerTradeSummary',
     # 'companyOwners',
+    # 'companyReports',
+    'country',
+    'currency',
+    # 'dividends',
+    'flagCode',
+    'hasInvestmentFees',
+    'highestPrice',
+    'id',
+    'isin',
+    # 'keyRatios',
+    'lastPrice',
+    'lastPriceUpdated',
+    # 'latestTrades',
+    'loanFactor',
+    'lowestPrice',
+    'marketList',
+    'marketMakerExpected',
+    'marketPlace',
+    'marketTrades',
+    'morningStarFactSheetUrl',
+    'name',
+    'numberOfOwners',
+    # 'orderDepthLevels',
+    'orderDepthReceivedTime',
+    'priceAtStartOfYear',
+    'priceFiveYearsAgo',
+    'priceOneMonthAgo',
+    'priceOneWeekAgo',
+    'priceOneYearAgo',
+    'priceSixMonthsAgo',
+    'priceThreeMonthsAgo',
+    'priceThreeYearsAgo',
+    'pushPermitted',
+    'quoteUpdated',
+    # 'relatedStocks',
+    'shortSellable',
+    'superLoan',
+    'tickerSymbol',
+    'totalValueTraded',
+    'totalVolumeTraded',
+    'tradable',
+]
+
+MONITORED_CONDITIONS_DEFAULT = [
+    'change',
+    'changePercent',
+    'name',
 ]
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_STOCK): cv.positive_int,
     vol.Optional(CONF_NAME): cv.string,
+    vol.Optional(CONF_MONITORED_CONDITIONS,
+                 default=MONITORED_CONDITIONS_DEFAULT):
+    vol.All(cv.ensure_list, [vol.In(MONITORED_CONDITIONS)]),
 })
 
 
@@ -98,16 +96,18 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     name = config.get(CONF_NAME)
     if config.get(CONF_NAME) is None:
         name = DEFAULT_NAME + ' ' + str(stock)
-    add_entities([AvanzaStockSensor(stock, name)], True)
+    monitored_conditions = config.get(CONF_MONITORED_CONDITIONS)
+    add_entities([AvanzaStockSensor(stock, name, monitored_conditions)], True)
 
 
 class AvanzaStockSensor(Entity):
     """Representation of a Avanza Stock sensor."""
 
-    def __init__(self, stock, name):
+    def __init__(self, stock, name, monitored_conditions):
         """Initialize a Avanza Stock sensor."""
         self._stock = stock
         self._name = name
+        self._monitored_conditions = monitored_conditions
         self._icon = "mdi:cash"
         self._state = 0
         self._state_attributes = {}
@@ -147,5 +147,5 @@ class AvanzaStockSensor(Entity):
             data = response.json()
             self._state = data['lastPrice']
             self._unit_of_measurement = data['currency']
-            for condition in MONITORED_CONDITIONS:
+            for condition in self._monitored_conditions:
                 self._state_attributes[condition] = data[condition]
