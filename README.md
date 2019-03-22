@@ -1,12 +1,28 @@
 # sensor.avanza_stock
-Custom component to get stock data from Avanza for [Home Assistant](https://www.home-assistant.io/).
+[![GitHub Release][releases-shield]][releases]
+[![GitHub Activity][commits-shield]][commits]
+[![custom_updater][customupdaterbadge]][customupdater]
+[![License][license-shield]](LICENSE.md)
+
+![Project Maintenance][maintenance-shield]
+[![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
+
+_Custom component to get stock data from [Avanza](https://www.avanza.se) for [Home Assistant](https://www.home-assistant.io/)._
 
 ## Installation
-1. Create a `custom_components` folder in your configuration folder, if you don't already have one.
-2. Create a folder named `avanza_stock` inside the `custom_components` folder.
-3. Put the `sensor.py` and `__init__.py` file in there (if you copy and paste the code, use [raw version](https://raw.githubusercontent.com/claha/sensor.avanza_stock/master/custom_components/avanza_stock/sensor.py)).
-4. Update `configuration.yaml` using the config options below.
-5. **You will need to restart after installation for the component to start working.**
+1. Using the tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
+2. If you do not have a `custom_components` directory (folder) there, you need to create it.
+3. In the `custom_components` directory (folder) create a new folder called `avanza_stock`.
+4. Download _all_ the files from the `custom_components/avanza_stock/` directory (folder) in this repository.
+5. Place the files you downloaded in the new directory (folder) you created.
+6. Add a sensor `- platform: avanza_stock` to your HA configuration.
+
+Using your HA configuration directory (folder) as a starting point you should now also have this:
+
+```text
+custom_components/avanza_stock/__init__.py
+custom_components/avanza_stock/sensor.py
+```
 
 ## Configuration
 key | type | description
@@ -127,3 +143,14 @@ Note: This automation could be further improved by looping over all sensors and 
 ## Changelog
 * 0.0.2 - Configure monitored conditions
 * 0.0.1 - Initial version
+
+[buymecoffee]: https://www.buymeacoffee.com/claha
+[buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=for-the-badge
+[commits-shield]: https://img.shields.io/github/commit-activity/y/custom-components/sensor.avanza_stock.svg?style=for-the-badge
+[commits]: https://github.com/custom-components/sensor.avanza_stock/commits/master
+[customupdater]: https://github.com/custom-components/custom_updater
+[customupdaterbadge]: https://img.shields.io/badge/custom__updater-true-success.svg?style=for-the-badge
+[license-shield]: https://img.shields.io/github/license/custom-components/sensor.avanza_stock.svg?style=for-the-badge
+[maintenance-shield]: https://img.shields.io/badge/maintainer-Claes%20Hallström%20%40claha-blue.svg?style=for-the-badge
+[releases-shield]: https://img.shields.io/github/release/custom-components/sensor.avanza_stock.svg?style=for-the-badge
+[releases]: https://github.com/custom-components/sensor.avanza_stock/releases
