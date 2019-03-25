@@ -1,2 +1,2 @@
-python:
+flake8:
   enabled: true
