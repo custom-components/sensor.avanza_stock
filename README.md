@@ -44,6 +44,7 @@ Full list of available attributes.
 * changePercent
 * country
 * currency
+* directYield
 * flagCode
 * hasInvestmentFees
 * highestPrice
@@ -62,6 +63,7 @@ Full list of available attributes.
 * numberOfOwners
 * orderDepthReceivedTime
 * priceAtStartOfYear
+* priceEarningsRatio
 * priceFiveYearsAgo
 * priceOneMonthAgo
 * priceOneWeekAgo
@@ -77,6 +79,7 @@ Full list of available attributes.
 * totalValueTraded
 * totalVolumeTraded
 * tradable
+* volatility
 
 ### Finding stock id
 Got to [Avanza](https://www.avanza.se) and search for the stock you want to track. In the resulting url there is a number, this is the stock id needed for the configuration. Even though it is a Swedish bank it is possible to find stocks from the following countries:
@@ -141,6 +144,7 @@ sensor:
 Note: This automation could be further improved by looping over all sensors and checking if their entity_id starts with `sensor.avanza_stock_` and then extract the information.
 
 ## Changelog
+* 0.0.3 - Add key ratios (directYield, priceEarningsRatio, volatility)
 * 0.0.2 - Configure monitored conditions
 * 0.0.1 - Initial version
 
