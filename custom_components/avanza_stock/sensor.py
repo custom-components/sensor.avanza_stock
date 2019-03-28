@@ -15,7 +15,7 @@ from homeassistant.const import (
     CONF_NAME, CONF_MONITORED_CONDITIONS)
 from homeassistant.helpers.entity import Entity
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,13 +35,13 @@ MONITORED_CONDITIONS = [
     # 'companyReports',
     'country',
     'currency',
+    'directYield',
     # 'dividends',
     'flagCode',
     'hasInvestmentFees',
     'highestPrice',
     'id',
     'isin',
-    # 'keyRatios',
     'lastPrice',
     'lastPriceUpdated',
     # 'latestTrades',
@@ -57,6 +57,7 @@ MONITORED_CONDITIONS = [
     # 'orderDepthLevels',
     'orderDepthReceivedTime',
     'priceAtStartOfYear',
+    'priceEarningsRatio',
     'priceFiveYearsAgo',
     'priceOneMonthAgo',
     'priceOneWeekAgo',
@@ -66,13 +67,19 @@ MONITORED_CONDITIONS = [
     'priceThreeYearsAgo',
     'pushPermitted',
     'quoteUpdated',
-    # 'relatedStocks',
     'shortSellable',
     'superLoan',
     'tickerSymbol',
     'totalValueTraded',
     'totalVolumeTraded',
     'tradable',
+    'volatility',
+]
+
+MONITORED_CONDITIONS_KEYRATIOS = [
+    'directYield',
+    'priceEarningsRatio',
+    'volatility',
 ]
 
 MONITORED_CONDITIONS_DEFAULT = [
@@ -145,7 +152,11 @@ class AvanzaStockSensor(Entity):
         response = requests.get(url)
         if response.status_code == requests.codes.ok:
             data = response.json()
+            keyRatios = data['keyRatios']
             self._state = data['lastPrice']
             self._unit_of_measurement = data['currency']
             for condition in self._monitored_conditions:
-                self._state_attributes[condition] = data[condition]
+                if condition in MONITORED_CONDITIONS_KEYRATIOS:
+                    self._state_attributes[condition] = keyRatios[condition]
+                else:
+                    self._state_attributes[condition] = data[condition]
