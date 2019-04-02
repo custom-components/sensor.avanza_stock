@@ -44,6 +44,7 @@ Full list of available attributes.
 * changePercent
 * country
 * currency
+* description
 * directYield
 * flagCode
 * hasInvestmentFees
@@ -54,6 +55,7 @@ Full list of available attributes.
 * lastPriceUpdated
 * loanFactor
 * lowestPrice
+* marketCapital
 * marketList
 * marketMakerExpected
 * marketPlace
@@ -73,9 +75,11 @@ Full list of available attributes.
 * priceThreeYearsAgo
 * pushPermitted
 * quoteUpdated
+* sector
 * shortSellable
 * superLoan
 * tickerSymbol
+* totalNumberOfShares
 * totalValueTraded
 * totalVolumeTraded
 * tradable
@@ -144,6 +148,7 @@ sensor:
 Note: This automation could be further improved by looping over all sensors and checking if their entity_id starts with `sensor.avanza_stock_` and then extract the information.
 
 ## Changelog
+* 0.0.4 - Add companny information (description, marketCapital, sector, totalNumberOfShares)
 * 0.0.3 - Add key ratios (directYield, priceEarningsRatio, volatility)
 * 0.0.2 - Configure monitored conditions
 * 0.0.1 - Initial version
