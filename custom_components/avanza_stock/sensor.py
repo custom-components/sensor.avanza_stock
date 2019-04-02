@@ -15,7 +15,7 @@ from homeassistant.const import (
     CONF_NAME, CONF_MONITORED_CONDITIONS)
 from homeassistant.helpers.entity import Entity
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -26,16 +26,11 @@ CONF_STOCK = 'stock'
 SCAN_INTERVAL = timedelta(minutes=60)
 
 MONITORED_CONDITIONS = [
-    # 'annualMeetings',
     'brokerTradeSummary',
     'change',
     'changePercent',
-    # 'company',
-    # 'companyOwners',
-    # 'companyReports',
     'country',
     'currency',
-    'directYield',
     # 'dividends',
     'flagCode',
     'hasInvestmentFees',
@@ -57,7 +52,6 @@ MONITORED_CONDITIONS = [
     # 'orderDepthLevels',
     'orderDepthReceivedTime',
     'priceAtStartOfYear',
-    'priceEarningsRatio',
     'priceFiveYearsAgo',
     'priceOneMonthAgo',
     'priceOneWeekAgo',
@@ -73,7 +67,6 @@ MONITORED_CONDITIONS = [
     'totalValueTraded',
     'totalVolumeTraded',
     'tradable',
-    'volatility',
 ]
 
 MONITORED_CONDITIONS_KEYRATIOS = [
@@ -81,6 +74,15 @@ MONITORED_CONDITIONS_KEYRATIOS = [
     'priceEarningsRatio',
     'volatility',
 ]
+MONITORED_CONDITIONS += MONITORED_CONDITIONS_KEYRATIOS
+
+MONITORED_CONDITIONS_COMPANY = [
+    'description',
+    'marketCapital',
+    'sector',
+    'totalNumberOfShares',
+]
+MONITORED_CONDITIONS += MONITORED_CONDITIONS_COMPANY
 
 MONITORED_CONDITIONS_DEFAULT = [
     'change',
@@ -153,10 +155,13 @@ class AvanzaStockSensor(Entity):
         if response.status_code == requests.codes.ok:
             data = response.json()
             keyRatios = data['keyRatios']
+            company = data['company']
             self._state = data['lastPrice']
             self._unit_of_measurement = data['currency']
             for condition in self._monitored_conditions:
                 if condition in MONITORED_CONDITIONS_KEYRATIOS:
                     self._state_attributes[condition] = keyRatios[condition]
+                elif condition in MONITORED_CONDITIONS_COMPANY:
+                    self._state_attributes[condition] = company[condition]
                 else:
                     self._state_attributes[condition] = data[condition]
