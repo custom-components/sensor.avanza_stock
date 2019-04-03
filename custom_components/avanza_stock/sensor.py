@@ -15,7 +15,7 @@ from homeassistant.const import (
     CONF_NAME, CONF_MONITORED_CONDITIONS)
 from homeassistant.helpers.entity import Entity
 
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ MONITORED_CONDITIONS = [
     'changePercent',
     'country',
     'currency',
-    # 'dividends',
+    'dividends',
     'flagCode',
     'hasInvestmentFees',
     'highestPrice',
@@ -83,6 +83,12 @@ MONITORED_CONDITIONS_COMPANY = [
     'totalNumberOfShares',
 ]
 MONITORED_CONDITIONS += MONITORED_CONDITIONS_COMPANY
+
+MONITORED_CONDITIONS_DIVIDENDS = [
+    'amountPerShare',
+    'exDate',
+    'paymentDate',
+]
 
 MONITORED_CONDITIONS_DEFAULT = [
     'change',
@@ -154,14 +160,28 @@ class AvanzaStockSensor(Entity):
         response = requests.get(url)
         if response.status_code == requests.codes.ok:
             data = response.json()
-            keyRatios = data['keyRatios']
-            company = data['company']
+            keyRatios = data.get('keyRatios', {})
+            company = data.get('company', {})
+            dividends = data.get('dividends', [])
             self._state = data['lastPrice']
             self._unit_of_measurement = data['currency']
             for condition in self._monitored_conditions:
                 if condition in MONITORED_CONDITIONS_KEYRATIOS:
-                    self._state_attributes[condition] = keyRatios[condition]
+                    self._state_attributes[condition] = keyRatios.get(
+                        condition, None)
                 elif condition in MONITORED_CONDITIONS_COMPANY:
-                    self._state_attributes[condition] = company[condition]
+                    self._state_attributes[condition] = company.get(
+                        condition, None)
+                elif condition == 'dividends':
+                    self.update_dividends(dividends)
                 else:
-                    self._state_attributes[condition] = data[condition]
+                    self._state_attributes[condition] = data.get(
+                        condition, None)
+
+    def update_dividends(self, dividends):
+        """Update dividend attributes."""
+        for i, dividend in enumerate(dividends):
+            for dividend_condition in MONITORED_CONDITIONS_DIVIDENDS:
+                attribute = 'dividend{0}_{1}'.format(i, dividend_condition)
+                self._state_attributes[attribute] = dividend.get(
+                    dividend_condition, None)
