@@ -5,7 +5,8 @@ For more details about this platform, please refer to the documentation at
 https://github.com/claha/sensor.avanza_stock/blob/master/README.md
 """
 import logging
-from datetime import timedelta
+from datetime import (
+    timedelta, datetime)
 
 import homeassistant.helpers.config_validation as cv
 import requests
@@ -15,7 +16,7 @@ from homeassistant.const import (
     CONF_NAME, CONF_MONITORED_CONDITIONS)
 from homeassistant.helpers.entity import Entity
 
-__version__ = '0.0.5'
+__version__ = '0.0.6'
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -180,8 +181,34 @@ class AvanzaStockSensor(Entity):
 
     def update_dividends(self, dividends):
         """Update dividend attributes."""
-        for i, dividend in enumerate(dividends):
+        # Crreate empty dividend attributes, will be overwritten with valid
+        # data if information is available
+        for dividend_condition in MONITORED_CONDITIONS_DIVIDENDS:
+            attribute = 'dividend0_{0}'.format(dividend_condition)
+            self._state_attributes[attribute] = 'unknown'
+
+        # Check that each dividend has the attributes needed.
+        # Dividends from the past sometimes misses attributes
+        # but we are not interested in them anyway.
+        for i, dividend in reversed(list(enumerate(dividends))):
+            has_all_attributes = True
             for dividend_condition in MONITORED_CONDITIONS_DIVIDENDS:
-                attribute = 'dividend{0}_{1}'.format(i, dividend_condition)
-                self._state_attributes[attribute] = dividend.get(
-                    dividend_condition, None)
+                if dividend_condition not in dividend:
+                    has_all_attributes = False
+            if not has_all_attributes:
+                del dividends[i]
+
+        # Sort dividends by payment date
+        dividends = sorted(dividends, key=lambda d: d['paymentDate'])
+
+        # Loop over data
+        i = 0
+        for dividend in dividends:
+            paymentDate = datetime.strptime(dividend['paymentDate'],
+                                            '%Y-%m-%d')
+            if paymentDate >= datetime.now():
+                for dividend_condition in MONITORED_CONDITIONS_DIVIDENDS:
+                    attribute = 'dividend{0}_{1}'.format(i, dividend_condition)
+                    self._state_attributes[attribute] = dividend[
+                        dividend_condition]
+                i += 1
