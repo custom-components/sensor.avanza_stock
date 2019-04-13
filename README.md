@@ -149,6 +149,7 @@ sensor:
 Note: This automation could be further improved by looping over all sensors and checking if their entity_id starts with `sensor.avanza_stock_` and then extract the information.
 
 ## Changelog
+* 0.0.6 - Make sure dividend payment date has not passed
 * 0.0.5 - Add dividends information
 * 0.0.4 - Add companny information (description, marketCapital, sector, totalNumberOfShares)
 * 0.0.3 - Add key ratios (directYield, priceEarningsRatio, volatility)
