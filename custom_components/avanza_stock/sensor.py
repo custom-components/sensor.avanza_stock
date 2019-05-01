@@ -16,7 +16,7 @@ from homeassistant.const import (
     CONF_NAME, CONF_MONITORED_CONDITIONS)
 from homeassistant.helpers.entity import Entity
 
-__version__ = '0.0.7'
+__version__ = '0.0.8'
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -185,7 +185,7 @@ class AvanzaStockSensor(Entity):
 
     def update_dividends(self, dividends):
         """Update dividend attributes."""
-        # Crreate empty dividend attributes, will be overwritten with valid
+        # Create empty dividend attributes, will be overwritten with valid
         # data if information is available
         for dividend_condition in MONITORED_CONDITIONS_DIVIDENDS:
             attribute = 'dividend0_{0}'.format(dividend_condition)
@@ -200,6 +200,8 @@ class AvanzaStockSensor(Entity):
                 if dividend_condition not in dividend:
                     has_all_attributes = False
             if not has_all_attributes:
+                del dividends[i]
+            elif dividend['amountPerShare'] == 0:
                 del dividends[i]
 
         # Sort dividends by payment date
