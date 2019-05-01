@@ -1,0 +1,8 @@
+{
+    "domain": "avanza_stock",
+    "name": "Avanza Stock",
+    "documentation": "https://github.com/custom-components/sensor.avanza_stock",
+    "dependencies": [],
+    "codeowners": ["@claha"],
+    "requirements": []
+}
