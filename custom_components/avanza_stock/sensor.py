@@ -16,7 +16,7 @@ from homeassistant.const import (
     CONF_NAME, CONF_MONITORED_CONDITIONS)
 from homeassistant.helpers.entity import Entity
 
-__version__ = '0.0.6'
+__version__ = '0.0.7'
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -106,14 +106,18 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 })
 
 
-def setup_platform(hass, config, add_entities, discovery_info=None):
+async def async_setup_platform(hass, config, async_add_entities,
+                               discovery_info=None):
     """Set up the Avanza Stock sensor."""
     stock = config.get(CONF_STOCK)
     name = config.get(CONF_NAME)
     if config.get(CONF_NAME) is None:
         name = DEFAULT_NAME + ' ' + str(stock)
     monitored_conditions = config.get(CONF_MONITORED_CONDITIONS)
-    add_entities([AvanzaStockSensor(stock, name, monitored_conditions)], True)
+    entities = [
+        AvanzaStockSensor(stock, name, monitored_conditions)
+    ]
+    async_add_entities(entities, True)
 
 
 class AvanzaStockSensor(Entity):
