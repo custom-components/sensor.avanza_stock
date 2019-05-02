@@ -132,6 +132,7 @@ class AvanzaStockSensor(Entity):
         self._state = 0
         self._state_attributes = {}
         self._unit_of_measurement = ''
+        self._api = AvanzaAPI()
 
     @property
     def name(self):
@@ -159,12 +160,9 @@ class AvanzaStockSensor(Entity):
         return self._unit_of_measurement
 
     def update(self):
-        """Get the latest data from the Avanza Stock API."""
-        url = 'https://www.avanza.se/_mobile/market/stock/{}'
-        url = url.format(self._stock)
-        response = requests.get(url)
-        if response.status_code == requests.codes.ok:
-            data = response.json()
+        """Update state and attributes.."""
+        data = self._api.get_stock(self._stock)
+        if data:
             keyRatios = data.get('keyRatios', {})
             company = data.get('company', {})
             dividends = data.get('dividends', [])
@@ -218,3 +216,19 @@ class AvanzaStockSensor(Entity):
                     self._state_attributes[attribute] = dividend[
                         dividend_condition]
                 i += 1
+
+
+class AvanzaAPI():
+    """Avanza API."""
+
+    def __init__(self):
+        """Initialize Avanza API."""
+        self._url_stock = 'https://www.avanza.se/_mobile/market/stock/{0}'
+
+    def get_stock(self, stock):
+        """Get the latest data from the Avanza Stock API."""
+        response = requests.get(self._url_stock.format(stock))
+        data = {}
+        if response.status_code == requests.codes.ok:
+            data = response.json()
+        return data
