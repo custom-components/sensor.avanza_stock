@@ -205,12 +205,16 @@ class AvanzaStockSensor(Entity):
         # Sort dividends by payment date
         dividends = sorted(dividends, key=lambda d: d['paymentDate'])
 
+        # Get todays date
+        today = datetime.now().replace(hour=0, minute=0, second=0,
+                                       microsecond=0)
+
         # Loop over data
         i = 0
         for dividend in dividends:
             paymentDate = datetime.strptime(dividend['paymentDate'],
                                             '%Y-%m-%d')
-            if paymentDate >= datetime.now():
+            if paymentDate >= today:
                 for dividend_condition in MONITORED_CONDITIONS_DIVIDENDS:
                     attribute = 'dividend{0}_{1}'.format(i, dividend_condition)
                     self._state_attributes[attribute] = dividend[
