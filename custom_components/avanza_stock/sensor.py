@@ -16,7 +16,7 @@ from homeassistant.const import (
     CONF_NAME, CONF_MONITORED_CONDITIONS)
 from homeassistant.helpers.entity import Entity
 
-__version__ = '0.0.8'
+__version__ = '0.0.9'
 
 _LOGGER = logging.getLogger(__name__)
 
