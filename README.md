@@ -22,6 +22,7 @@ Using your HA configuration directory (folder) as a starting point you should no
 ```text
 custom_components/avanza_stock/__init__.py
 custom_components/avanza_stock/sensor.py
+custom_components/avanza_stock/manifest.json
 ```
 
 ## Configuration
@@ -30,6 +31,7 @@ key | type | description
 **platform (Required)** | string | `avanza_stock`
 **stock (Required)** | number | The stock id, see below how to find it.
 **name (Optional)** | string | Custom name for the sensor. Default `avanza_stock_{stock}`.
+**shares (Optional)** | number | The number of shares you own of this stock.
 **monitored_conditions (Optional)** | list | Defines the attributes of the sensor, see below.
 
 ### Monitored conditions
@@ -148,6 +150,7 @@ sensor:
 Note: This automation could be further improved by looping over all sensors and checking if their entity_id starts with `sensor.avanza_stock_` and then extract the information.
 
 ## Changelog
+* 1.0.0  - Add number of shares as optional configuration
 * 0.0.10 - Clean up monitored conditions
 * 0.0.9  - Compare payment date with todays date, ignore time
 * 0.0.8  - Ignore dividend if amount is zero, add resources.json and manfiest.json
