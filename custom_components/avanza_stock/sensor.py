@@ -2,21 +2,20 @@
 Support for getting stock data from avanza.se.
 
 For more details about this platform, please refer to the documentation at
-https://github.com/claha/sensor.avanza_stock/blob/master/README.md
+https://github.com/custom-components/sensor.avanza_stock/blob/master/README.md
 """
 import logging
-from datetime import (
-    timedelta, datetime)
+from datetime import datetime, timedelta
 
-import homeassistant.helpers.config_validation as cv
 import requests
 import voluptuous as vol
+
+import homeassistant.helpers.config_validation as cv
 from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.const import (
-    CONF_NAME, CONF_MONITORED_CONDITIONS)
+from homeassistant.const import CONF_MONITORED_CONDITIONS, CONF_NAME
 from homeassistant.helpers.entity import Entity
 
-__version__ = '0.0.9'
+__version__ = '0.0.10'
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,7 +26,6 @@ CONF_STOCK = 'stock'
 SCAN_INTERVAL = timedelta(minutes=60)
 
 MONITORED_CONDITIONS = [
-    'brokerTradeSummary',
     'change',
     'changePercent',
     'country',
@@ -40,7 +38,6 @@ MONITORED_CONDITIONS = [
     'isin',
     'lastPrice',
     'lastPriceUpdated',
-    # 'latestTrades',
     'loanFactor',
     'lowestPrice',
     'marketList',
@@ -50,7 +47,6 @@ MONITORED_CONDITIONS = [
     'morningStarFactSheetUrl',
     'name',
     'numberOfOwners',
-    # 'orderDepthLevels',
     'orderDepthReceivedTime',
     'priceAtStartOfYear',
     'priceFiveYearsAgo',
