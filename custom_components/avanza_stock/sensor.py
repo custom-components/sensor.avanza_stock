@@ -15,13 +15,14 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import CONF_MONITORED_CONDITIONS, CONF_NAME
 from homeassistant.helpers.entity import Entity
 
-__version__ = '0.0.10'
+__version__ = '1.0.0'
 
 _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_NAME = 'Avanza Stock'
 
 CONF_STOCK = 'stock'
+CONF_SHARES = 'shares'
 
 SCAN_INTERVAL = timedelta(minutes=60)
 
@@ -96,6 +97,7 @@ MONITORED_CONDITIONS_DEFAULT = [
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_STOCK): cv.positive_int,
     vol.Optional(CONF_NAME): cv.string,
+    vol.Optional(CONF_SHARES): cv.positive_int,
     vol.Optional(CONF_MONITORED_CONDITIONS,
                  default=MONITORED_CONDITIONS_DEFAULT):
     vol.All(cv.ensure_list, [vol.In(MONITORED_CONDITIONS)]),
@@ -107,11 +109,12 @@ async def async_setup_platform(hass, config, async_add_entities,
     """Set up the Avanza Stock sensor."""
     stock = config.get(CONF_STOCK)
     name = config.get(CONF_NAME)
-    if config.get(CONF_NAME) is None:
+    shares = config.get(CONF_SHARES)
+    if name is None:
         name = DEFAULT_NAME + ' ' + str(stock)
     monitored_conditions = config.get(CONF_MONITORED_CONDITIONS)
     entities = [
-        AvanzaStockSensor(stock, name, monitored_conditions)
+        AvanzaStockSensor(stock, name, shares, monitored_conditions)
     ]
     async_add_entities(entities, True)
 
@@ -119,10 +122,11 @@ async def async_setup_platform(hass, config, async_add_entities,
 class AvanzaStockSensor(Entity):
     """Representation of a Avanza Stock sensor."""
 
-    def __init__(self, stock, name, monitored_conditions):
+    def __init__(self, stock, name, shares, monitored_conditions):
         """Initialize a Avanza Stock sensor."""
         self._stock = stock
         self._name = name
+        self._shares = shares
         self._monitored_conditions = monitored_conditions
         self._icon = "mdi:cash"
         self._state = 0
@@ -156,7 +160,7 @@ class AvanzaStockSensor(Entity):
         return self._unit_of_measurement
 
     def update(self):
-        """Update state and attributes.."""
+        """Update state and attributes."""
         data = self._api.get_stock(self._stock)
         if data:
             keyRatios = data.get('keyRatios', {})
@@ -176,6 +180,9 @@ class AvanzaStockSensor(Entity):
                 else:
                     self._state_attributes[condition] = data.get(
                         condition, None)
+
+        if self._shares is not None:
+            self._state_attributes['shares'] = self._shares
 
     def update_dividends(self, dividends):
         """Update dividend attributes."""
