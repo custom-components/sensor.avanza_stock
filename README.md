@@ -39,7 +39,6 @@ The following attributes are tracked by default
 * name
 
 Full list of available attributes.
-* brokerTradeSummary
 * change
 * changePercent
 * country
@@ -149,14 +148,16 @@ sensor:
 Note: This automation could be further improved by looping over all sensors and checking if their entity_id starts with `sensor.avanza_stock_` and then extract the information.
 
 ## Changelog
-* 0.0.8 - Ignore dividend if amount is zero, add resources.json and manfiest.json
-* 0.0.7 - Changed to async setup
-* 0.0.6 - Make sure dividend payment date has not passed
-* 0.0.5 - Add dividends information
-* 0.0.4 - Add companny information (description, marketCapital, sector, totalNumberOfShares)
-* 0.0.3 - Add key ratios (directYield, priceEarningsRatio, volatility)
-* 0.0.2 - Configure monitored conditions
-* 0.0.1 - Initial version
+* 0.0.10 - Clean up monitored conditions
+* 0.0.9  - Compare payment date with todays date, ignore time
+* 0.0.8  - Ignore dividend if amount is zero, add resources.json and manfiest.json
+* 0.0.7  - Changed to async setup
+* 0.0.6  - Make sure dividend payment date has not passed
+* 0.0.5  - Add dividends information
+* 0.0.4  - Add companny information (description, marketCapital, sector, totalNumberOfShares)
+* 0.0.3  - Add key ratios (directYield, priceEarningsRatio, volatility)
+* 0.0.2  - Configure monitored conditions
+* 0.0.1  - Initial version
 
 [buymecoffee]: https://www.buymeacoffee.com/claha
 [buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=for-the-badge
