@@ -6,7 +6,7 @@
 
 ![Project Maintenance][maintenance-shield]
 [![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
-
+forked from the custom components repo, to calculate the gain or loss if the number of shares are included
 _Custom component to get stock data from [Avanza](https://www.avanza.se) for [Home Assistant](https://www.home-assistant.io/)._
 
 ## Installation
