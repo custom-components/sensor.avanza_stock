@@ -132,6 +132,7 @@ class AvanzaStockSensor(Entity):
         self._state = 0
         self._state_attributes = {}
         self._unit_of_measurement = ''
+        self._gain_loss = 0
         self._api = AvanzaAPI()
 
     @property
@@ -159,6 +160,11 @@ class AvanzaStockSensor(Entity):
         """Return the unit of measurement."""
         return self._unit_of_measurement
 
+    @property
+    def gain_loss(self):
+        """Return the Gain or Loss."""
+        return self._gain_loss
+
     def update(self):
         """Update state and attributes."""
         data = self._api.get_stock(self._stock)
@@ -168,6 +174,7 @@ class AvanzaStockSensor(Entity):
             dividends = data.get('dividends', [])
             self._state = data['lastPrice']
             self._unit_of_measurement = data['currency']
+            daychange = data['change']
             for condition in self._monitored_conditions:
                 if condition in MONITORED_CONDITIONS_KEYRATIOS:
                     self._state_attributes[condition] = keyRatios.get(
@@ -182,7 +189,9 @@ class AvanzaStockSensor(Entity):
                         condition, None)
 
         if self._shares is not None:
+            sharescalcalculategain = self._shares
             self._state_attributes['shares'] = self._shares
+            self._state_attributes['gain_loss'] = round(sharescalcalculategain * daychange, 2)
 
     def update_dividends(self, dividends):
         """Update dividend attributes."""
