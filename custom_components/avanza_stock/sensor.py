@@ -97,7 +97,7 @@ MONITORED_CONDITIONS_DEFAULT = [
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_STOCK): cv.positive_int,
     vol.Optional(CONF_NAME): cv.string,
-    vol.Optional(CONF_SHARES): cv.positive_int,
+    vol.Optional(CONF_SHARES): vol.Coerce(float),
     vol.Optional(CONF_MONITORED_CONDITIONS,
                  default=MONITORED_CONDITIONS_DEFAULT):
     vol.All(cv.ensure_list, [vol.In(MONITORED_CONDITIONS)]),
