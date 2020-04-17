@@ -198,6 +198,23 @@ class AvanzaStockSensor(Entity):
                         else:
                             self._state_attributes[change] = 'unknown'
 
+                    if self._shares is not None:
+                        for (change, price) in [
+                                ('totalChangeOneWeek', 'priceOneWeekAgo'),
+                                ('totalChangeOneMonth', 'priceOneMonthAgo'),
+                                ('totalChangeThreeMonths', 'priceThreeMonthsAgo'),  # noqa: E501
+                                ('totalChangeSixMonths', 'priceSixMonthsAgo'),
+                                ('totalChangeOneYear', 'priceOneYearAgo'),
+                                ('totalChangeThreeYears', 'priceThreeYearsAgo'),  # noqa: E501
+                                ('totalChangeFiveYears', 'priceFiveYearsAgo'),
+                                ('totalChangeCurrentYear', 'priceAtStartOfYear'),  # noqa: E501
+                        ]:
+                            if price in data:
+                                self._state_attributes[change] = round(
+                                    self._shares * (data['lastPrice'] - data[price]), 2)  # noqa: E501
+                            else:
+                                self._state_attributes[change] = 'unknown'
+
                 if condition == 'changePercent':
                     for (change, price) in [
                             ('changePercentOneWeek', 'priceOneWeekAgo'),
@@ -214,9 +231,11 @@ class AvanzaStockSensor(Entity):
                                 100 * (data['lastPrice'] - data[price]) / data[price], 2)  # noqa: E501
                         else:
                             self._state_attributes[change] = 'unknown'
+
         if self._shares is not None:
             self._state_attributes['shares'] = self._shares
             self._state_attributes['totalValue'] = self._shares * data['lastPrice']  # noqa: E501
+            self._state_attributes['totalChange'] = self._shares * data['change']  # noqa: E501
 
     def update_dividends(self, dividends):
         """Update dividend attributes."""
