@@ -150,6 +150,7 @@ sensor:
 Note: This automation could be further improved by looping over all sensors and checking if their entity_id starts with `sensor.avanza_stock_` and then extract the information.
 
 ## Changelog
+* 1.0.1  - Allow fractional shares, add more change attributes
 * 1.0.0  - Add number of shares as optional configuration
 * 0.0.10 - Clean up monitored conditions
 * 0.0.9  - Compare payment date with todays date, ignore time
