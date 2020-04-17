@@ -181,6 +181,39 @@ class AvanzaStockSensor(Entity):
                     self._state_attributes[condition] = data.get(
                         condition, None)
 
+                if condition == 'change':
+                    for (change, price) in [
+                            ('changeOneWeek', 'priceOneWeekAgo'),
+                            ('changeOneMonth', 'priceOneMonthAgo'),
+                            ('changeThreeMonths', 'priceThreeMonthsAgo'),
+                            ('changeSixMonths', 'priceSixMonthsAgo'),
+                            ('changeOneYear', 'priceOneYearAgo'),
+                            ('changeThreeYears', 'priceThreeYearsAgo'),
+                            ('changeFiveYears', 'priceFiveYearsAgo'),
+                            ('changeCurrentYear', 'priceAtStartOfYear'),
+                    ]:
+                        if price in data:
+                            self._state_attributes[change] = round(
+                                data['lastPrice'] - data[price], 2)
+                        else:
+                            self._state_attributes[change] = 'unknown'
+
+                if condition == 'changePercent':
+                    for (change, price) in [
+                            ('changePercentOneWeek', 'priceOneWeekAgo'),
+                            ('changePercentOneMonth', 'priceOneMonthAgo'),
+                            ('changePercentThreeMonths', 'priceThreeMonthsAgo'),  # noqa: E501
+                            ('changePercentSixMonths', 'priceSixMonthsAgo'),
+                            ('changePercentOneYear', 'priceOneYearAgo'),
+                            ('changePercentThreeYears', 'priceThreeYearsAgo'),
+                            ('changePercentFiveYears', 'priceFiveYearsAgo'),
+                            ('changePercentCurrentYear', 'priceAtStartOfYear'),
+                    ]:
+                        if price in data:
+                            self._state_attributes[change] = round(
+                                100 * (data['lastPrice'] - data[price]) / data[price], 2)  # noqa: E501
+                        else:
+                            self._state_attributes[change] = 'unknown'
         if self._shares is not None:
             self._state_attributes['shares'] = self._shares
             self._state_attributes['totalValue'] = self._shares * data['lastPrice']  # noqa: E501
