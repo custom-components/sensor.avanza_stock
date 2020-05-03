@@ -1,0 +1,8 @@
+{
+    "name": "Avanza Stock",
+    "domains": [
+        "sensor"
+    ],
+    "iot_class": "cloud_poll",
+    "render_readme": true
+}
