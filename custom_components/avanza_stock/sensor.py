@@ -15,107 +15,106 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import CONF_MONITORED_CONDITIONS, CONF_NAME
 from homeassistant.helpers.entity import Entity
 
-__version__ = '1.0.1'
+__version__ = "1.0.1"
 
 _LOGGER = logging.getLogger(__name__)
 
-DEFAULT_NAME = 'Avanza Stock'
+DEFAULT_NAME = "Avanza Stock"
 
-CONF_STOCK = 'stock'
-CONF_SHARES = 'shares'
+CONF_STOCK = "stock"
+CONF_SHARES = "shares"
 
 SCAN_INTERVAL = timedelta(minutes=60)
 
 MONITORED_CONDITIONS = [
-    'change',
-    'changePercent',
-    'country',
-    'currency',
-    'dividends',
-    'flagCode',
-    'hasInvestmentFees',
-    'highestPrice',
-    'id',
-    'isin',
-    'lastPrice',
-    'lastPriceUpdated',
-    'loanFactor',
-    'lowestPrice',
-    'marketList',
-    'marketMakerExpected',
-    'marketPlace',
-    'marketTrades',
-    'morningStarFactSheetUrl',
-    'name',
-    'numberOfOwners',
-    'orderDepthReceivedTime',
-    'priceAtStartOfYear',
-    'priceFiveYearsAgo',
-    'priceOneMonthAgo',
-    'priceOneWeekAgo',
-    'priceOneYearAgo',
-    'priceSixMonthsAgo',
-    'priceThreeMonthsAgo',
-    'priceThreeYearsAgo',
-    'pushPermitted',
-    'quoteUpdated',
-    'shortSellable',
-    'superLoan',
-    'tickerSymbol',
-    'totalValueTraded',
-    'totalVolumeTraded',
-    'tradable',
+    "change",
+    "changePercent",
+    "country",
+    "currency",
+    "dividends",
+    "flagCode",
+    "hasInvestmentFees",
+    "highestPrice",
+    "id",
+    "isin",
+    "lastPrice",
+    "lastPriceUpdated",
+    "loanFactor",
+    "lowestPrice",
+    "marketList",
+    "marketMakerExpected",
+    "marketPlace",
+    "marketTrades",
+    "morningStarFactSheetUrl",
+    "name",
+    "numberOfOwners",
+    "orderDepthReceivedTime",
+    "priceAtStartOfYear",
+    "priceFiveYearsAgo",
+    "priceOneMonthAgo",
+    "priceOneWeekAgo",
+    "priceOneYearAgo",
+    "priceSixMonthsAgo",
+    "priceThreeMonthsAgo",
+    "priceThreeYearsAgo",
+    "pushPermitted",
+    "quoteUpdated",
+    "shortSellable",
+    "superLoan",
+    "tickerSymbol",
+    "totalValueTraded",
+    "totalVolumeTraded",
+    "tradable",
 ]
 
 MONITORED_CONDITIONS_KEYRATIOS = [
-    'directYield',
-    'priceEarningsRatio',
-    'volatility',
+    "directYield",
+    "priceEarningsRatio",
+    "volatility",
 ]
 MONITORED_CONDITIONS += MONITORED_CONDITIONS_KEYRATIOS
 
 MONITORED_CONDITIONS_COMPANY = [
-    'description',
-    'marketCapital',
-    'sector',
-    'totalNumberOfShares',
+    "description",
+    "marketCapital",
+    "sector",
+    "totalNumberOfShares",
 ]
 MONITORED_CONDITIONS += MONITORED_CONDITIONS_COMPANY
 
 MONITORED_CONDITIONS_DIVIDENDS = [
-    'amountPerShare',
-    'exDate',
-    'paymentDate',
+    "amountPerShare",
+    "exDate",
+    "paymentDate",
 ]
 
 MONITORED_CONDITIONS_DEFAULT = [
-    'change',
-    'changePercent',
-    'name',
+    "change",
+    "changePercent",
+    "name",
 ]
 
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
-    vol.Required(CONF_STOCK): cv.positive_int,
-    vol.Optional(CONF_NAME): cv.string,
-    vol.Optional(CONF_SHARES): vol.Coerce(float),
-    vol.Optional(CONF_MONITORED_CONDITIONS,
-                 default=MONITORED_CONDITIONS_DEFAULT):
-    vol.All(cv.ensure_list, [vol.In(MONITORED_CONDITIONS)]),
-})
+PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
+    {
+        vol.Required(CONF_STOCK): cv.positive_int,
+        vol.Optional(CONF_NAME): cv.string,
+        vol.Optional(CONF_SHARES): vol.Coerce(float),
+        vol.Optional(
+            CONF_MONITORED_CONDITIONS, default=MONITORED_CONDITIONS_DEFAULT
+        ): vol.All(cv.ensure_list, [vol.In(MONITORED_CONDITIONS)]),
+    }
+)
 
 
-async def async_setup_platform(hass, config, async_add_entities,
-                               discovery_info=None):
+async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Set up the Avanza Stock sensor."""
     stock = config.get(CONF_STOCK)
     name = config.get(CONF_NAME)
     shares = config.get(CONF_SHARES)
     if name is None:
-        name = DEFAULT_NAME + ' ' + str(stock)
+        name = DEFAULT_NAME + " " + str(stock)
     monitored_conditions = config.get(CONF_MONITORED_CONDITIONS)
-    entities = [
-        AvanzaStockSensor(stock, name, shares, monitored_conditions)
-    ]
+    entities = [AvanzaStockSensor(stock, name, shares, monitored_conditions)]
     async_add_entities(entities, True)
 
 
@@ -131,7 +130,7 @@ class AvanzaStockSensor(Entity):
         self._icon = "mdi:cash"
         self._state = 0
         self._state_attributes = {}
-        self._unit_of_measurement = ''
+        self._unit_of_measurement = ""
         self._api = AvanzaAPI()
 
     @property
@@ -163,87 +162,103 @@ class AvanzaStockSensor(Entity):
         """Update state and attributes."""
         data = self._api.get_stock(self._stock)
         if data:
-            keyRatios = data.get('keyRatios', {})
-            company = data.get('company', {})
-            dividends = data.get('dividends', [])
-            self._state = data['lastPrice']
-            self._unit_of_measurement = data['currency']
+            keyRatios = data.get("keyRatios", {})
+            company = data.get("company", {})
+            dividends = data.get("dividends", [])
+            self._state = data["lastPrice"]
+            self._unit_of_measurement = data["currency"]
             for condition in self._monitored_conditions:
                 if condition in MONITORED_CONDITIONS_KEYRATIOS:
-                    self._state_attributes[condition] = keyRatios.get(
-                        condition, None)
+                    self._state_attributes[condition] = keyRatios.get(condition, None)
                 elif condition in MONITORED_CONDITIONS_COMPANY:
-                    self._state_attributes[condition] = company.get(
-                        condition, None)
-                elif condition == 'dividends':
+                    self._state_attributes[condition] = company.get(condition, None)
+                elif condition == "dividends":
                     self.update_dividends(dividends)
                 else:
-                    self._state_attributes[condition] = data.get(
-                        condition, None)
+                    self._state_attributes[condition] = data.get(condition, None)
 
-                if condition == 'change':
+                if condition == "change":
                     for (change, price) in [
-                            ('changeOneWeek', 'priceOneWeekAgo'),
-                            ('changeOneMonth', 'priceOneMonthAgo'),
-                            ('changeThreeMonths', 'priceThreeMonthsAgo'),
-                            ('changeSixMonths', 'priceSixMonthsAgo'),
-                            ('changeOneYear', 'priceOneYearAgo'),
-                            ('changeThreeYears', 'priceThreeYearsAgo'),
-                            ('changeFiveYears', 'priceFiveYearsAgo'),
-                            ('changeCurrentYear', 'priceAtStartOfYear'),
+                        ("changeOneWeek", "priceOneWeekAgo"),
+                        ("changeOneMonth", "priceOneMonthAgo"),
+                        ("changeThreeMonths", "priceThreeMonthsAgo"),
+                        ("changeSixMonths", "priceSixMonthsAgo"),
+                        ("changeOneYear", "priceOneYearAgo"),
+                        ("changeThreeYears", "priceThreeYearsAgo"),
+                        ("changeFiveYears", "priceFiveYearsAgo"),
+                        ("changeCurrentYear", "priceAtStartOfYear"),
                     ]:
                         if price in data:
                             self._state_attributes[change] = round(
-                                data['lastPrice'] - data[price], 2)
+                                data["lastPrice"] - data[price], 2
+                            )
                         else:
-                            self._state_attributes[change] = 'unknown'
+                            self._state_attributes[change] = "unknown"
 
                     if self._shares is not None:
                         for (change, price) in [
-                                ('totalChangeOneWeek', 'priceOneWeekAgo'),
-                                ('totalChangeOneMonth', 'priceOneMonthAgo'),
-                                ('totalChangeThreeMonths', 'priceThreeMonthsAgo'),  # noqa: E501
-                                ('totalChangeSixMonths', 'priceSixMonthsAgo'),
-                                ('totalChangeOneYear', 'priceOneYearAgo'),
-                                ('totalChangeThreeYears', 'priceThreeYearsAgo'),  # noqa: E501
-                                ('totalChangeFiveYears', 'priceFiveYearsAgo'),
-                                ('totalChangeCurrentYear', 'priceAtStartOfYear'),  # noqa: E501
+                            ("totalChangeOneWeek", "priceOneWeekAgo"),
+                            ("totalChangeOneMonth", "priceOneMonthAgo"),
+                            (
+                                "totalChangeThreeMonths",
+                                "priceThreeMonthsAgo",
+                            ),  # noqa: E501
+                            ("totalChangeSixMonths", "priceSixMonthsAgo"),
+                            ("totalChangeOneYear", "priceOneYearAgo"),
+                            (
+                                "totalChangeThreeYears",
+                                "priceThreeYearsAgo",
+                            ),  # noqa: E501
+                            ("totalChangeFiveYears", "priceFiveYearsAgo"),
+                            (
+                                "totalChangeCurrentYear",
+                                "priceAtStartOfYear",
+                            ),  # noqa: E501
                         ]:
                             if price in data:
                                 self._state_attributes[change] = round(
-                                    self._shares * (data['lastPrice'] - data[price]), 2)  # noqa: E501
+                                    self._shares * (data["lastPrice"] - data[price]), 2
+                                )  # noqa: E501
                             else:
-                                self._state_attributes[change] = 'unknown'
+                                self._state_attributes[change] = "unknown"
 
-                if condition == 'changePercent':
+                if condition == "changePercent":
                     for (change, price) in [
-                            ('changePercentOneWeek', 'priceOneWeekAgo'),
-                            ('changePercentOneMonth', 'priceOneMonthAgo'),
-                            ('changePercentThreeMonths', 'priceThreeMonthsAgo'),  # noqa: E501
-                            ('changePercentSixMonths', 'priceSixMonthsAgo'),
-                            ('changePercentOneYear', 'priceOneYearAgo'),
-                            ('changePercentThreeYears', 'priceThreeYearsAgo'),
-                            ('changePercentFiveYears', 'priceFiveYearsAgo'),
-                            ('changePercentCurrentYear', 'priceAtStartOfYear'),
+                        ("changePercentOneWeek", "priceOneWeekAgo"),
+                        ("changePercentOneMonth", "priceOneMonthAgo"),
+                        (
+                            "changePercentThreeMonths",
+                            "priceThreeMonthsAgo",
+                        ),  # noqa: E501
+                        ("changePercentSixMonths", "priceSixMonthsAgo"),
+                        ("changePercentOneYear", "priceOneYearAgo"),
+                        ("changePercentThreeYears", "priceThreeYearsAgo"),
+                        ("changePercentFiveYears", "priceFiveYearsAgo"),
+                        ("changePercentCurrentYear", "priceAtStartOfYear"),
                     ]:
                         if price in data:
                             self._state_attributes[change] = round(
-                                100 * (data['lastPrice'] - data[price]) / data[price], 2)  # noqa: E501
+                                100 * (data["lastPrice"] - data[price]) / data[price], 2
+                            )  # noqa: E501
                         else:
-                            self._state_attributes[change] = 'unknown'
+                            self._state_attributes[change] = "unknown"
 
         if self._shares is not None:
-            self._state_attributes['shares'] = self._shares
-            self._state_attributes['totalValue'] = self._shares * data['lastPrice']  # noqa: E501
-            self._state_attributes['totalChange'] = self._shares * data['change']  # noqa: E501
+            self._state_attributes["shares"] = self._shares
+            self._state_attributes["totalValue"] = (
+                self._shares * data["lastPrice"]
+            )  # noqa: E501
+            self._state_attributes["totalChange"] = (
+                self._shares * data["change"]
+            )  # noqa: E501
 
     def update_dividends(self, dividends):
         """Update dividend attributes."""
         # Create empty dividend attributes, will be overwritten with valid
         # data if information is available
         for dividend_condition in MONITORED_CONDITIONS_DIVIDENDS:
-            attribute = 'dividend0_{0}'.format(dividend_condition)
-            self._state_attributes[attribute] = 'unknown'
+            attribute = "dividend0_{0}".format(dividend_condition)
+            self._state_attributes[attribute] = "unknown"
 
         # Check that each dividend has the attributes needed.
         # Dividends from the past sometimes misses attributes
@@ -255,35 +270,32 @@ class AvanzaStockSensor(Entity):
                     has_all_attributes = False
             if not has_all_attributes:
                 del dividends[i]
-            elif dividend['amountPerShare'] == 0:
+            elif dividend["amountPerShare"] == 0:
                 del dividends[i]
 
         # Sort dividends by payment date
-        dividends = sorted(dividends, key=lambda d: d['paymentDate'])
+        dividends = sorted(dividends, key=lambda d: d["paymentDate"])
 
         # Get todays date
-        today = datetime.now().replace(hour=0, minute=0, second=0,
-                                       microsecond=0)
+        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
         # Loop over data
         i = 0
         for dividend in dividends:
-            paymentDate = datetime.strptime(dividend['paymentDate'],
-                                            '%Y-%m-%d')
+            paymentDate = datetime.strptime(dividend["paymentDate"], "%Y-%m-%d")
             if paymentDate >= today:
                 for dividend_condition in MONITORED_CONDITIONS_DIVIDENDS:
-                    attribute = 'dividend{0}_{1}'.format(i, dividend_condition)
-                    self._state_attributes[attribute] = dividend[
-                        dividend_condition]
+                    attribute = "dividend{0}_{1}".format(i, dividend_condition)
+                    self._state_attributes[attribute] = dividend[dividend_condition]
                 i += 1
 
 
-class AvanzaAPI():
+class AvanzaAPI:
     """Avanza API."""
 
     def __init__(self):
         """Initialize Avanza API."""
-        self._url_stock = 'https://www.avanza.se/_mobile/market/stock/{0}'
+        self._url_stock = "https://www.avanza.se/_mobile/market/stock/{0}"
 
     def get_stock(self, stock):
         """Get the latest data from the Avanza Stock API."""
