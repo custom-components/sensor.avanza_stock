@@ -1,29 +1,24 @@
 # sensor.avanza_stock
 [![GitHub Release][releases-shield]][releases]
 [![GitHub Activity][commits-shield]][commits]
-[![custom_updater][customupdaterbadge]][customupdater]
-[![License][license-shield]](LICENSE.md)
+[![License][license-shield]](LICENSE)
 
+[![hacs][hacsbadge]][hacs]
 ![Project Maintenance][maintenance-shield]
 [![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
-_Custom component to get stock data from [Avanza](https://www.avanza.se) for [Home Assistant](https://www.home-assistant.io/)._
+_Custom component to get stock data from [Avanza](https://www.avanza.se) for
+[Home Assistant](https://www.home-assistant.io/)._
 
 ## Installation
-1. Using the tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
-2. If you do not have a `custom_components` directory (folder) there, you need to create it.
-3. In the `custom_components` directory (folder) create a new folder called `avanza_stock`.
-4. Download _all_ the files from the `custom_components/avanza_stock/` directory (folder) in this repository.
-5. Place the files you downloaded in the new directory (folder) you created.
-6. Add a sensor `- platform: avanza_stock` to your HA configuration.
+- The easiest way is to install it with [HACS](https://hacs.xyz/). First install
+[HACS](https://hacs.xyz/) if you don't have it yet. After installation you can
+find this custom component in the HACS store under integrations.
 
-Using your HA configuration directory (folder) as a starting point you should now also have this:
-
-```text
-custom_components/avanza_stock/__init__.py
-custom_components/avanza_stock/sensor.py
-custom_components/avanza_stock/manifest.json
-```
+- Alternatively, you can install it manually. Just copy paste the content of the
+`sensor.avanza_stock/custom_components` folder in your `config/custom_components`
+directory. As example, you will get the `sensor.py` file in the following path:
+`/config/custom_components/avanza_stock/sensor.py`.
 
 ## Configuration
 key | type | description
@@ -35,7 +30,7 @@ key | type | description
 **monitored_conditions (Optional)** | list | Defines the attributes of the sensor, see below.
 
 ### Monitored conditions
-The following attributes are tracked by default
+The following attributes are tracked if `monitored_conditions` is not defined.
 * change
 * changePercent
 * name
@@ -122,7 +117,7 @@ sensor:
 ```
 
 ## Usage
-**Automation to send summary after stock market closes on workdays using telegram:**
+**Automation to send summary at 18:00 using telegram:**
 ```yaml
 # Telegram Stock Summary
 - alias: 'Telegram Stock Summary'
@@ -132,22 +127,16 @@ sensor:
     - platform: time
       at: '18:00:00'
 
-  condition:
-    condition: state
-    entity_id: binary_sensor.workday
-    state: 'on'
-
   action:
     - service: notify.telegram
       data:
         message: '
-<b>Stock Summary {{ states.sensor.date.state }}</b>
+<b>Stock Summary </b>
 <code>
 {{ states.sensor.avanza_stock_5361.attributes.name }} : {{ states.sensor.avanza_stock_5361.attributes.changePercent }}
 </code>
 '
 ```
-Note: This automation could be further improved by looping over all sensors and checking if their entity_id starts with `sensor.avanza_stock_` and then extract the information.
 
 ## Changelog
 * 1.0.1  - Allow fractional shares, add more change attributes
@@ -167,8 +156,8 @@ Note: This automation could be further improved by looping over all sensors and 
 [buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=for-the-badge
 [commits-shield]: https://img.shields.io/github/commit-activity/y/custom-components/sensor.avanza_stock.svg?style=for-the-badge
 [commits]: https://github.com/custom-components/sensor.avanza_stock/commits/master
-[customupdater]: https://github.com/custom-components/custom_updater
-[customupdaterbadge]: https://img.shields.io/badge/custom__updater-true-success.svg?style=for-the-badge
+[hacs]: https://github.com/custom-components/hacs
+[hacsbadge]: https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge
 [license-shield]: https://img.shields.io/github/license/custom-components/sensor.avanza_stock.svg?style=for-the-badge
 [maintenance-shield]: https://img.shields.io/badge/maintainer-Claes%20Hallström%20%40claha-blue.svg?style=for-the-badge
 [releases-shield]: https://img.shields.io/github/release/custom-components/sensor.avanza_stock.svg?style=for-the-badge
