@@ -7,13 +7,14 @@ https://github.com/custom-components/sensor.avanza_stock/blob/master/README.md
 import logging
 from datetime import datetime, timedelta
 
-import requests
 import voluptuous as vol
 
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import CONF_MONITORED_CONDITIONS, CONF_NAME
 from homeassistant.helpers.entity import Entity
+
+import pyavanza
 
 from custom_components.avanza_stock.const import (
     CONF_STOCK,
@@ -68,7 +69,6 @@ class AvanzaStockSensor(Entity):
         self._state = 0
         self._state_attributes = {}
         self._unit_of_measurement = ""
-        self._api = AvanzaAPI()
 
     @property
     def name(self):
@@ -97,7 +97,7 @@ class AvanzaStockSensor(Entity):
 
     def update(self):
         """Update state and attributes."""
-        data = self._api.get_stock(self._stock)
+        data = pyavanza.get_stock(self._stock)
         if data:
             keyRatios = data.get("keyRatios", {})
             company = data.get("company", {})
@@ -209,19 +209,3 @@ class AvanzaStockSensor(Entity):
                     attribute = "dividend{0}_{1}".format(i, dividend_condition)
                     self._state_attributes[attribute] = dividend[dividend_condition]
                 i += 1
-
-
-class AvanzaAPI:
-    """Avanza API."""
-
-    def __init__(self):
-        """Initialize Avanza API."""
-        self._url_stock = "https://www.avanza.se/_mobile/market/stock/{0}"
-
-    def get_stock(self, stock):
-        """Get the latest data from the Avanza Stock API."""
-        response = requests.get(self._url_stock.format(stock))
-        data = {}
-        if response.status_code == requests.codes.ok:
-            data = response.json()
-        return data
