@@ -15,84 +15,21 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import CONF_MONITORED_CONDITIONS, CONF_NAME
 from homeassistant.helpers.entity import Entity
 
-__version__ = "1.0.1"
+from custom_components.avanza_stock.const import (
+    CONF_STOCK,
+    CONF_SHARES,
+    MONITORED_CONDITIONS_DEFAULT,
+    MONITORED_CONDITIONS,
+    DEFAULT_NAME,
+    MONITORED_CONDITIONS_KEYRATIOS,
+    MONITORED_CONDITIONS_COMPANY,
+    MONITORED_CONDITIONS_DIVIDENDS,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
-DEFAULT_NAME = "Avanza Stock"
-
-CONF_STOCK = "stock"
-CONF_SHARES = "shares"
-
 SCAN_INTERVAL = timedelta(minutes=60)
 
-MONITORED_CONDITIONS = [
-    "change",
-    "changePercent",
-    "country",
-    "currency",
-    "dividends",
-    "flagCode",
-    "hasInvestmentFees",
-    "highestPrice",
-    "id",
-    "isin",
-    "lastPrice",
-    "lastPriceUpdated",
-    "loanFactor",
-    "lowestPrice",
-    "marketList",
-    "marketMakerExpected",
-    "marketPlace",
-    "marketTrades",
-    "morningStarFactSheetUrl",
-    "name",
-    "numberOfOwners",
-    "orderDepthReceivedTime",
-    "priceAtStartOfYear",
-    "priceFiveYearsAgo",
-    "priceOneMonthAgo",
-    "priceOneWeekAgo",
-    "priceOneYearAgo",
-    "priceSixMonthsAgo",
-    "priceThreeMonthsAgo",
-    "priceThreeYearsAgo",
-    "pushPermitted",
-    "quoteUpdated",
-    "shortSellable",
-    "superLoan",
-    "tickerSymbol",
-    "totalValueTraded",
-    "totalVolumeTraded",
-    "tradable",
-]
-
-MONITORED_CONDITIONS_KEYRATIOS = [
-    "directYield",
-    "priceEarningsRatio",
-    "volatility",
-]
-MONITORED_CONDITIONS += MONITORED_CONDITIONS_KEYRATIOS
-
-MONITORED_CONDITIONS_COMPANY = [
-    "description",
-    "marketCapital",
-    "sector",
-    "totalNumberOfShares",
-]
-MONITORED_CONDITIONS += MONITORED_CONDITIONS_COMPANY
-
-MONITORED_CONDITIONS_DIVIDENDS = [
-    "amountPerShare",
-    "exDate",
-    "paymentDate",
-]
-
-MONITORED_CONDITIONS_DEFAULT = [
-    "change",
-    "changePercent",
-    "name",
-]
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
