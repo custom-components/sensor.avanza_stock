@@ -136,26 +136,17 @@ class AvanzaStockSensor(Entity):
                         for (change, price) in [
                             ("totalChangeOneWeek", "priceOneWeekAgo"),
                             ("totalChangeOneMonth", "priceOneMonthAgo"),
-                            (
-                                "totalChangeThreeMonths",
-                                "priceThreeMonthsAgo",
-                            ),  # noqa: E501
+                            ("totalChangeThreeMonths", "priceThreeMonthsAgo",),
                             ("totalChangeSixMonths", "priceSixMonthsAgo"),
                             ("totalChangeOneYear", "priceOneYearAgo"),
-                            (
-                                "totalChangeThreeYears",
-                                "priceThreeYearsAgo",
-                            ),  # noqa: E501
+                            ("totalChangeThreeYears", "priceThreeYearsAgo",),
                             ("totalChangeFiveYears", "priceFiveYearsAgo"),
-                            (
-                                "totalChangeCurrentYear",
-                                "priceAtStartOfYear",
-                            ),  # noqa: E501
+                            ("totalChangeCurrentYear", "priceAtStartOfYear",),
                         ]:
                             if price in data:
                                 self._state_attributes[change] = round(
                                     self._shares * (data["lastPrice"] - data[price]), 2
-                                )  # noqa: E501
+                                )
                             else:
                                 self._state_attributes[change] = "unknown"
 
@@ -163,10 +154,7 @@ class AvanzaStockSensor(Entity):
                     for (change, price) in [
                         ("changePercentOneWeek", "priceOneWeekAgo"),
                         ("changePercentOneMonth", "priceOneMonthAgo"),
-                        (
-                            "changePercentThreeMonths",
-                            "priceThreeMonthsAgo",
-                        ),  # noqa: E501
+                        ("changePercentThreeMonths", "priceThreeMonthsAgo",),
                         ("changePercentSixMonths", "priceSixMonthsAgo"),
                         ("changePercentOneYear", "priceOneYearAgo"),
                         ("changePercentThreeYears", "priceThreeYearsAgo"),
@@ -176,18 +164,14 @@ class AvanzaStockSensor(Entity):
                         if price in data:
                             self._state_attributes[change] = round(
                                 100 * (data["lastPrice"] - data[price]) / data[price], 2
-                            )  # noqa: E501
+                            )
                         else:
                             self._state_attributes[change] = "unknown"
 
         if self._shares is not None:
             self._state_attributes["shares"] = self._shares
-            self._state_attributes["totalValue"] = (
-                self._shares * data["lastPrice"]
-            )  # noqa: E501
-            self._state_attributes["totalChange"] = (
-                self._shares * data["change"]
-            )  # noqa: E501
+            self._state_attributes["totalValue"] = self._shares * data["lastPrice"]
+            self._state_attributes["totalChange"] = self._shares * data["change"]
 
     def update_dividends(self, dividends):
         """Update dividend attributes."""
