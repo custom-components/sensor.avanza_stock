@@ -12,6 +12,7 @@ import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import CONF_MONITORED_CONDITIONS, CONF_NAME
+from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers.entity import Entity
 
 import pyavanza
@@ -52,19 +53,21 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     if name is None:
         name = DEFAULT_NAME + " " + str(stock)
     monitored_conditions = config.get(CONF_MONITORED_CONDITIONS)
-    entities = [AvanzaStockSensor(stock, name, shares, monitored_conditions)]
+    session = async_create_clientsession(hass)
+    entities = [AvanzaStockSensor(stock, name, shares, monitored_conditions, session)]
     async_add_entities(entities, True)
 
 
 class AvanzaStockSensor(Entity):
     """Representation of a Avanza Stock sensor."""
 
-    def __init__(self, stock, name, shares, monitored_conditions):
+    def __init__(self, stock, name, shares, monitored_conditions, session):
         """Initialize a Avanza Stock sensor."""
         self._stock = stock
         self._name = name
         self._shares = shares
         self._monitored_conditions = monitored_conditions
+        self._session = session
         self._icon = "mdi:cash"
         self._state = 0
         self._state_attributes = {}
@@ -95,9 +98,13 @@ class AvanzaStockSensor(Entity):
         """Return the unit of measurement."""
         return self._unit_of_measurement
 
-    def update(self):
+    async def async_update(self):
         """Update state and attributes."""
-        data = pyavanza.get_stock(self._stock)
+        data = await pyavanza.get_stock(self._stock)
+        self.update_data(data)
+
+    def update_data(self, data):
+        """Update state and attributes."""
         if data:
             keyRatios = data.get("keyRatios", {})
             company = data.get("company", {})
@@ -168,10 +175,10 @@ class AvanzaStockSensor(Entity):
                         else:
                             self._state_attributes[change] = "unknown"
 
-        if self._shares is not None:
-            self._state_attributes["shares"] = self._shares
-            self._state_attributes["totalValue"] = self._shares * data["lastPrice"]
-            self._state_attributes["totalChange"] = self._shares * data["change"]
+            if self._shares is not None:
+                self._state_attributes["shares"] = self._shares
+                self._state_attributes["totalValue"] = self._shares * data["lastPrice"]
+                self._state_attributes["totalChange"] = self._shares * data["change"]
 
     def update_dividends(self, dividends):
         """Update dividend attributes."""
