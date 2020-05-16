@@ -4,5 +4,5 @@
     "documentation": "https://github.com/custom-components/sensor.avanza_stock",
     "dependencies": [],
     "codeowners": ["@claha"],
-    "requirements": ["pyavanza==0.2.1"]
+    "requirements": ["pyavanza==0.2.2"]
 }

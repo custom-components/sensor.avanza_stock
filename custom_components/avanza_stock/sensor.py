@@ -100,7 +100,7 @@ class AvanzaStockSensor(Entity):
 
     async def async_update(self):
         """Update state and attributes."""
-        data = await pyavanza.get_stock(self._stock)
+        data = await pyavanza.get_stock_async(self._session, self._stock)
         self.update_data(data)
 
     def update_data(self, data):
