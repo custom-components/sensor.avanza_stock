@@ -1,9 +1,11 @@
-name: Push actions
+name: Push/Pull actions
 
 on:
   push:
     branches:
       - master
+
+  pull_request:
 
 jobs:
   validate:
