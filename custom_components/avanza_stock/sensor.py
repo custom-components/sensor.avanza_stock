@@ -7,26 +7,23 @@ https://github.com/custom-components/sensor.avanza_stock/blob/master/README.md
 import logging
 from datetime import datetime, timedelta
 
-import voluptuous as vol
-
 import homeassistant.helpers.config_validation as cv
+import pyavanza
+import voluptuous as vol
+from custom_components.avanza_stock.const import (
+    CONF_SHARES,
+    CONF_STOCK,
+    DEFAULT_NAME,
+    MONITORED_CONDITIONS,
+    MONITORED_CONDITIONS_COMPANY,
+    MONITORED_CONDITIONS_DEFAULT,
+    MONITORED_CONDITIONS_DIVIDENDS,
+    MONITORED_CONDITIONS_KEYRATIOS,
+)
 from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.const import CONF_MONITORED_CONDITIONS, CONF_NAME, CONF_ID
+from homeassistant.const import CONF_ID, CONF_MONITORED_CONDITIONS, CONF_NAME
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers.entity import Entity
-
-import pyavanza
-
-from custom_components.avanza_stock.const import (
-    CONF_STOCK,
-    CONF_SHARES,
-    MONITORED_CONDITIONS_DEFAULT,
-    MONITORED_CONDITIONS,
-    DEFAULT_NAME,
-    MONITORED_CONDITIONS_KEYRATIOS,
-    MONITORED_CONDITIONS_COMPANY,
-    MONITORED_CONDITIONS_DIVIDENDS,
-)
 
 _LOGGER = logging.getLogger(__name__)
 
