@@ -37,4 +37,9 @@ jobs:
             flake8 --version
             flake8 .
 
+        - run: |
+            pip3 install isort
+            isort --version
+            isort --check-only --verbose
+
         - run: if git ls-files | xargs file | grep CRLF; then exit 1; fi
