@@ -30,4 +30,9 @@ jobs:
         - run: python3 -m pip install black
         - run: black .
 
+        - run: |
+            pip3 install flake8 flake8-docstrings
+            flake8 --version
+            flake8 .
+
         - run: if git ls-files | xargs file | grep CRLF; then exit 1; fi
