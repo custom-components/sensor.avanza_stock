@@ -24,10 +24,17 @@ directory. As example, you will get the `sensor.py` file in the following path:
 key | type | description
 :--- | :--- | :---
 **platform (Required)** | string | `avanza_stock`
-**stock (Required)** | number | The stock id, see below how to find it.
-**name (Optional)** | string | Custom name for the sensor. Default `avanza_stock_{stock}`.
-**shares (Optional)** | number | The number of shares you own of this stock.
+**stock (Required)** | number / list of stocks | The stock id or list of stocks, see below how to define the list. Also see below how to find the id.
+**name (Optional)** | string | Custom name for the sensor. Default `avanza_stock_{stock}`. Redundant if stock is defined as a list.
+**shares (Optional)** | number | The number of shares you own of this stock, can be fractional. Redundant if stock is definend as a list.
 **monitored_conditions (Optional)** | list | Defines the attributes of the sensor, see below.
+
+### Stock configuration
+key | type | description
+:--- | :--- | :---
+**id (Required)** | number | The stock id, see below how to find it.
+**name (Optional)** |string | Custom name for the sensor. Default `avanza_stock_{stock}`.
+**shares (Optional)** | number | The number of shares you own of this stock, can be fractional.
 
 ### Monitored conditions
 The following attributes are tracked if `monitored_conditions` is not defined.
