@@ -199,8 +199,12 @@ class AvanzaStockSensor(Entity):
 
             if self._shares is not None:
                 self._state_attributes["shares"] = self._shares
-                self._state_attributes["totalValue"] = self._shares * data["lastPrice"]
-                self._state_attributes["totalChange"] = self._shares * data["change"]
+                self._state_attributes["totalValue"] = round(
+                    self._shares * data["lastPrice"], 2
+                )
+                self._state_attributes["totalChange"] = round(
+                    self._shares * data["change"], 2
+                )
 
     def update_dividends(self, dividends):
         """Update dividend attributes."""
