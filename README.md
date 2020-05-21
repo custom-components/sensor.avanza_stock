@@ -123,6 +123,20 @@ sensor:
       - totalValueTraded
 ```
 
+**Configuration with multiple stocks:**
+```yaml
+sensor:
+  - platform: avanza_stock
+    stock:
+      - id: 5361
+        name: Avanza Bank Holding
+      - id: 8123
+        name: Home Assistant
+    monitored_conditions:
+      - totalVolumeTraded
+      - totalValueTraded
+```
+
 ## Usage
 **Automation to send summary at 18:00 using telegram:**
 ```yaml
@@ -146,6 +160,8 @@ sensor:
 ```
 
 ## Changelog
+* 1.0.3  - All to define multiple stocks
+* 1.0.2  - Async update
 * 1.0.1  - Allow fractional shares, add more change attributes
 * 1.0.0  - Add number of shares as optional configuration
 * 0.0.10 - Clean up monitored conditions
