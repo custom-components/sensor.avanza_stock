@@ -11,6 +11,7 @@ import homeassistant.helpers.config_validation as cv
 import pyavanza
 import voluptuous as vol
 from custom_components.avanza_stock.const import (
+    CONF_PURCHASE_PRICE,
     CONF_SHARES,
     CONF_STOCK,
     DEFAULT_NAME,
@@ -34,6 +35,7 @@ STOCK_SCHEMA = vol.Schema(
         vol.Required(CONF_ID): cv.positive_int,
         vol.Optional(CONF_NAME): cv.string,
         vol.Optional(CONF_SHARES): vol.Coerce(float),
+        vol.Optional(CONF_PURCHASE_PRICE): vol.Coerce(float),
     }
 )
 
@@ -44,6 +46,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         ),
         vol.Optional(CONF_NAME): cv.string,
         vol.Optional(CONF_SHARES): vol.Coerce(float),
+        vol.Optional(CONF_PURCHASE_PRICE): vol.Coerce(float),
         vol.Optional(
             CONF_MONITORED_CONDITIONS, default=MONITORED_CONDITIONS_DEFAULT
         ): vol.All(cv.ensure_list, [vol.In(MONITORED_CONDITIONS)]),
@@ -60,10 +63,13 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     if isinstance(stock, int):
         name = config.get(CONF_NAME)
         shares = config.get(CONF_SHARES)
+        purchase_price = config.get(CONF_PURCHASE_PRICE)
         if name is None:
             name = DEFAULT_NAME + " " + str(stock)
         entities.append(
-            AvanzaStockSensor(stock, name, shares, monitored_conditions, session)
+            AvanzaStockSensor(
+                stock, name, shares, purchase_price, monitored_conditions, session
+            )
         )
         _LOGGER.info("Tracking %s [%d] using Avanza" % (name, stock))
     else:
@@ -73,8 +79,11 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
             if name is None:
                 name = DEFAULT_NAME + " " + str(id)
             shares = s.get(CONF_SHARES)
+            purchase_price = s.get(CONF_PURCHASE_PRICE)
             entities.append(
-                AvanzaStockSensor(id, name, shares, monitored_conditions, session)
+                AvanzaStockSensor(
+                    id, name, shares, purchase_price, monitored_conditions, session
+                )
             )
             _LOGGER.info("Tracking %s [%d] using Avanza" % (name, id))
     async_add_entities(entities, True)
@@ -83,11 +92,14 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 class AvanzaStockSensor(Entity):
     """Representation of a Avanza Stock sensor."""
 
-    def __init__(self, stock, name, shares, monitored_conditions, session):
+    def __init__(
+        self, stock, name, shares, purchase_price, monitored_conditions, session
+    ):
         """Initialize a Avanza Stock sensor."""
         self._stock = stock
         self._name = name
         self._shares = shares
+        self._purchase_price = purchase_price
         self._monitored_conditions = monitored_conditions
         self._session = session
         self._icon = "mdi:cash"
@@ -204,6 +216,23 @@ class AvanzaStockSensor(Entity):
                 )
                 self._state_attributes["totalChange"] = round(
                     self._shares * data["change"], 2
+                )
+
+            self._update_profit_loss(data["lastPrice"])
+
+    def _update_profit_loss(self, price):
+        if self._purchase_price is not None:
+            self._state_attributes["purchasePrice"] = self._purchase_price
+            self._state_attributes["profitLoss"] = round(
+                price - self._purchase_price, 2
+            )
+            self._state_attributes["profitLossPercentage"] = round(
+                100 * (price - self._purchase_price) / self._purchase_price, 2,
+            )
+
+            if self._shares is not None:
+                self._state_attributes["totaProfitLoss"] = round(
+                    self._shares * (price - self._purchase_price), 2
                 )
 
     def update_dividends(self, dividends):
