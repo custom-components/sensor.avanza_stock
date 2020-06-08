@@ -11,9 +11,11 @@ import homeassistant.helpers.config_validation as cv
 import pyavanza
 import voluptuous as vol
 from custom_components.avanza_stock.const import (
+    CONF_CONVERSION_RATE,
     CONF_PURCHASE_PRICE,
     CONF_SHARES,
     CONF_STOCK,
+    CURRENCY_ATTRIBUTE,
     DEFAULT_NAME,
     MONITORED_CONDITIONS,
     MONITORED_CONDITIONS_COMPANY,
@@ -22,7 +24,12 @@ from custom_components.avanza_stock.const import (
     MONITORED_CONDITIONS_KEYRATIOS,
 )
 from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.const import CONF_ID, CONF_MONITORED_CONDITIONS, CONF_NAME
+from homeassistant.const import (
+    CONF_CURRENCY,
+    CONF_ID,
+    CONF_MONITORED_CONDITIONS,
+    CONF_NAME,
+)
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers.entity import Entity
 
@@ -36,6 +43,8 @@ STOCK_SCHEMA = vol.Schema(
         vol.Optional(CONF_NAME): cv.string,
         vol.Optional(CONF_SHARES): vol.Coerce(float),
         vol.Optional(CONF_PURCHASE_PRICE): vol.Coerce(float),
+        vol.Inclusive(CONF_CONVERSION_RATE, "currency"): cv.entity_id,
+        vol.Inclusive(CONF_CURRENCY, "currency"): cv.string,
     }
 )
 
@@ -47,6 +56,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_NAME): cv.string,
         vol.Optional(CONF_SHARES): vol.Coerce(float),
         vol.Optional(CONF_PURCHASE_PRICE): vol.Coerce(float),
+        vol.Inclusive(CONF_CONVERSION_RATE, "currency"): cv.entity_id,
+        vol.Inclusive(CONF_CURRENCY, "currency"): cv.string,
         vol.Optional(
             CONF_MONITORED_CONDITIONS, default=MONITORED_CONDITIONS_DEFAULT
         ): vol.All(cv.ensure_list, [vol.In(MONITORED_CONDITIONS)]),
@@ -64,11 +75,21 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         name = config.get(CONF_NAME)
         shares = config.get(CONF_SHARES)
         purchase_price = config.get(CONF_PURCHASE_PRICE)
+        conversion_rate = config.get(CONF_CONVERSION_RATE)
+        currency = config.get(CONF_CURRENCY)
         if name is None:
             name = DEFAULT_NAME + " " + str(stock)
         entities.append(
             AvanzaStockSensor(
-                stock, name, shares, purchase_price, monitored_conditions, session
+                hass,
+                stock,
+                name,
+                shares,
+                purchase_price,
+                conversion_rate,
+                currency,
+                monitored_conditions,
+                session,
             )
         )
         _LOGGER.info("Tracking %s [%d] using Avanza" % (name, stock))
@@ -80,9 +101,19 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                 name = DEFAULT_NAME + " " + str(id)
             shares = s.get(CONF_SHARES)
             purchase_price = s.get(CONF_PURCHASE_PRICE)
+            conversion_rate = s.get(CONF_CONVERSION_RATE)
+            currency = s.get(CONF_CURRENCY)
             entities.append(
                 AvanzaStockSensor(
-                    id, name, shares, purchase_price, monitored_conditions, session
+                    hass,
+                    id,
+                    name,
+                    shares,
+                    purchase_price,
+                    conversion_rate,
+                    currency,
+                    monitored_conditions,
+                    session,
                 )
             )
             _LOGGER.info("Tracking %s [%d] using Avanza" % (name, id))
@@ -93,13 +124,25 @@ class AvanzaStockSensor(Entity):
     """Representation of a Avanza Stock sensor."""
 
     def __init__(
-        self, stock, name, shares, purchase_price, monitored_conditions, session
+        self,
+        hass,
+        stock,
+        name,
+        shares,
+        purchase_price,
+        conversion_rate,
+        currency,
+        monitored_conditions,
+        session,
     ):
         """Initialize a Avanza Stock sensor."""
+        self._hass = hass
         self._stock = stock
         self._name = name
         self._shares = shares
         self._purchase_price = purchase_price
+        self._conversion_rate = conversion_rate
+        self._currency = currency
         self._monitored_conditions = monitored_conditions
         self._session = session
         self._icon = "mdi:cash"
@@ -136,6 +179,7 @@ class AvanzaStockSensor(Entity):
         """Update state and attributes."""
         data = await pyavanza.get_stock_async(self._session, self._stock)
         self.update_data(data)
+        self._update_conversion_rate()
 
     def update_data(self, data):
         """Update state and attributes."""
@@ -234,6 +278,22 @@ class AvanzaStockSensor(Entity):
                 self._state_attributes["totalProfitLoss"] = round(
                     self._shares * (price - self._purchase_price), 2
                 )
+
+    def _update_conversion_rate(self):
+        if self._conversion_rate is None or self._currency is None:
+            return
+        rate = float(self._hass.states.get(self._conversion_rate).state)
+        for attribute in self._state_attributes:
+            if (
+                attribute in CURRENCY_ATTRIBUTE
+                and self._state_attributes[attribute] is not None
+                and self._state_attributes[attribute] != "unknown"
+            ):
+                self._state_attributes[attribute] = round(
+                    self._state_attributes[attribute] * rate, 2
+                )
+        self._state = round(self._state * rate, 2)
+        self._unit_of_measurement = self._currency
 
     def update_dividends(self, dividends):
         """Update dividend attributes."""
