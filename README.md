@@ -26,7 +26,7 @@ key | type | description
 **platform (Required)** | string | `avanza_stock`
 **stock (Required)** | number / list of stocks | The stock id or list of stocks, see below how to define the list. Also see below how to find the id.
 **name (Optional)** | string | Custom name for the sensor. Default `avanza_stock_{stock}`. Redundant if stock is defined as a list.
-**shares (Optional)** | number | The number of shares you own of this stock, can be fractional. Redundant if stock is definend as a list.
+**shares (Optional)** | number | The number of shares you own of this stock, can be fractional. Redundant if stock is defined as a list.
 **purchase_price (Optional)** | number | The price paid when stock was purchased.
 **monitored_conditions (Optional)** | list | Defines the attributes of the sensor, see below.
 
@@ -167,7 +167,7 @@ sensor:
 * 1.0.1  - Allow fractional shares, add more change attributes
 * 1.0.0  - Add number of shares as optional configuration
 * 0.0.10 - Clean up monitored conditions
-* 0.0.9  - Compare payment date with todays date, ignore time
+* 0.0.9  - Compare payment date with today's date, ignore time
 * 0.0.8  - Ignore dividend if amount is zero, add resources.json and manfiest.json
 * 0.0.7  - Changed to async setup
 * 0.0.6  - Make sure dividend payment date has not passed

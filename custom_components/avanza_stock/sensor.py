@@ -231,7 +231,7 @@ class AvanzaStockSensor(Entity):
             )
 
             if self._shares is not None:
-                self._state_attributes["totaProfitLoss"] = round(
+                self._state_attributes["totalProfitLoss"] = round(
                     self._shares * (price - self._purchase_price), 2
                 )
 
@@ -259,7 +259,7 @@ class AvanzaStockSensor(Entity):
         # Sort dividends by payment date
         dividends = sorted(dividends, key=lambda d: d["paymentDate"])
 
-        # Get todays date
+        # Get today's date
         today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
         # Loop over data
