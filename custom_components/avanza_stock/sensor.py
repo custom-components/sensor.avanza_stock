@@ -178,91 +178,104 @@ class AvanzaStockSensor(Entity):
     async def async_update(self):
         """Update state and attributes."""
         data = await pyavanza.get_stock_async(self._session, self._stock)
-        self.update_data(data)
-        self._update_conversion_rate()
-
-    def update_data(self, data):
-        """Update state and attributes."""
         if data:
-            keyRatios = data.get("keyRatios", {})
-            company = data.get("company", {})
-            dividends = data.get("dividends", [])
-            self._state = data["lastPrice"]
+            self._update_state(data)
+            self._update_unit_of_measurement(data)
+            self._update_state_attributes(data)
+            self._update_conversion_rate()
+
+    def _update_state(self, data):
+        self._state = data["lastPrice"]
+
+    def _update_unit_of_measurement(self, data):
+        if self._conversion_rate is None or self._currency is None:
             self._unit_of_measurement = data["currency"]
-            for condition in self._monitored_conditions:
-                if condition in MONITORED_CONDITIONS_KEYRATIOS:
-                    self._state_attributes[condition] = keyRatios.get(condition, None)
-                elif condition in MONITORED_CONDITIONS_COMPANY:
-                    self._state_attributes[condition] = company.get(condition, None)
-                elif condition == "dividends":
-                    self.update_dividends(dividends)
-                else:
-                    self._state_attributes[condition] = data.get(condition, None)
+        else:
+            self._unit_of_measurement = self._currency
 
-                if condition == "change":
+    def _update_state_attributes(self, data):
+        for condition in self._monitored_conditions:
+            if condition in MONITORED_CONDITIONS_KEYRATIOS:
+                self._update_key_ratios(data, condition)
+            elif condition in MONITORED_CONDITIONS_COMPANY:
+                self._update_company(data, condition)
+            elif condition == "dividends":
+                self._update_dividends(data)
+            else:
+                self._state_attributes[condition] = data.get(condition, None)
+
+            if condition == "change":
+                for (change, price) in [
+                    ("changeOneWeek", "priceOneWeekAgo"),
+                    ("changeOneMonth", "priceOneMonthAgo"),
+                    ("changeThreeMonths", "priceThreeMonthsAgo"),
+                    ("changeSixMonths", "priceSixMonthsAgo"),
+                    ("changeOneYear", "priceOneYearAgo"),
+                    ("changeThreeYears", "priceThreeYearsAgo"),
+                    ("changeFiveYears", "priceFiveYearsAgo"),
+                    ("changeCurrentYear", "priceAtStartOfYear"),
+                ]:
+                    if price in data:
+                        self._state_attributes[change] = round(
+                            data["lastPrice"] - data[price], 2
+                        )
+                    else:
+                        self._state_attributes[change] = "unknown"
+
+                if self._shares is not None:
                     for (change, price) in [
-                        ("changeOneWeek", "priceOneWeekAgo"),
-                        ("changeOneMonth", "priceOneMonthAgo"),
-                        ("changeThreeMonths", "priceThreeMonthsAgo"),
-                        ("changeSixMonths", "priceSixMonthsAgo"),
-                        ("changeOneYear", "priceOneYearAgo"),
-                        ("changeThreeYears", "priceThreeYearsAgo"),
-                        ("changeFiveYears", "priceFiveYearsAgo"),
-                        ("changeCurrentYear", "priceAtStartOfYear"),
+                        ("totalChangeOneWeek", "priceOneWeekAgo"),
+                        ("totalChangeOneMonth", "priceOneMonthAgo"),
+                        ("totalChangeThreeMonths", "priceThreeMonthsAgo",),
+                        ("totalChangeSixMonths", "priceSixMonthsAgo"),
+                        ("totalChangeOneYear", "priceOneYearAgo"),
+                        ("totalChangeThreeYears", "priceThreeYearsAgo",),
+                        ("totalChangeFiveYears", "priceFiveYearsAgo"),
+                        ("totalChangeCurrentYear", "priceAtStartOfYear",),
                     ]:
                         if price in data:
                             self._state_attributes[change] = round(
-                                data["lastPrice"] - data[price], 2
+                                self._shares * (data["lastPrice"] - data[price]), 2
                             )
                         else:
                             self._state_attributes[change] = "unknown"
 
-                    if self._shares is not None:
-                        for (change, price) in [
-                            ("totalChangeOneWeek", "priceOneWeekAgo"),
-                            ("totalChangeOneMonth", "priceOneMonthAgo"),
-                            ("totalChangeThreeMonths", "priceThreeMonthsAgo",),
-                            ("totalChangeSixMonths", "priceSixMonthsAgo"),
-                            ("totalChangeOneYear", "priceOneYearAgo"),
-                            ("totalChangeThreeYears", "priceThreeYearsAgo",),
-                            ("totalChangeFiveYears", "priceFiveYearsAgo"),
-                            ("totalChangeCurrentYear", "priceAtStartOfYear",),
-                        ]:
-                            if price in data:
-                                self._state_attributes[change] = round(
-                                    self._shares * (data["lastPrice"] - data[price]), 2
-                                )
-                            else:
-                                self._state_attributes[change] = "unknown"
+            if condition == "changePercent":
+                for (change, price) in [
+                    ("changePercentOneWeek", "priceOneWeekAgo"),
+                    ("changePercentOneMonth", "priceOneMonthAgo"),
+                    ("changePercentThreeMonths", "priceThreeMonthsAgo",),
+                    ("changePercentSixMonths", "priceSixMonthsAgo"),
+                    ("changePercentOneYear", "priceOneYearAgo"),
+                    ("changePercentThreeYears", "priceThreeYearsAgo"),
+                    ("changePercentFiveYears", "priceFiveYearsAgo"),
+                    ("changePercentCurrentYear", "priceAtStartOfYear"),
+                ]:
+                    if price in data:
+                        self._state_attributes[change] = round(
+                            100 * (data["lastPrice"] - data[price]) / data[price], 2
+                        )
+                    else:
+                        self._state_attributes[change] = "unknown"
 
-                if condition == "changePercent":
-                    for (change, price) in [
-                        ("changePercentOneWeek", "priceOneWeekAgo"),
-                        ("changePercentOneMonth", "priceOneMonthAgo"),
-                        ("changePercentThreeMonths", "priceThreeMonthsAgo",),
-                        ("changePercentSixMonths", "priceSixMonthsAgo"),
-                        ("changePercentOneYear", "priceOneYearAgo"),
-                        ("changePercentThreeYears", "priceThreeYearsAgo"),
-                        ("changePercentFiveYears", "priceFiveYearsAgo"),
-                        ("changePercentCurrentYear", "priceAtStartOfYear"),
-                    ]:
-                        if price in data:
-                            self._state_attributes[change] = round(
-                                100 * (data["lastPrice"] - data[price]) / data[price], 2
-                            )
-                        else:
-                            self._state_attributes[change] = "unknown"
+        if self._shares is not None:
+            self._state_attributes["shares"] = self._shares
+            self._state_attributes["totalValue"] = round(
+                self._shares * data["lastPrice"], 2
+            )
+            self._state_attributes["totalChange"] = round(
+                self._shares * data["change"], 2
+            )
 
-            if self._shares is not None:
-                self._state_attributes["shares"] = self._shares
-                self._state_attributes["totalValue"] = round(
-                    self._shares * data["lastPrice"], 2
-                )
-                self._state_attributes["totalChange"] = round(
-                    self._shares * data["change"], 2
-                )
+        self._update_profit_loss(data["lastPrice"])
 
-            self._update_profit_loss(data["lastPrice"])
+    def _update_key_ratios(self, data, attr):
+        key_ratios = data.get("keyRatios", {})
+        self._state_attributes[attr] = key_ratios.get(attr, None)
+
+    def _update_company(self, data, attr):
+        company = data.get("company", {})
+        self._state_attributes[attr] = company.get(attr, None)
 
     def _update_profit_loss(self, price):
         if self._purchase_price is not None:
@@ -280,9 +293,7 @@ class AvanzaStockSensor(Entity):
                 )
 
     def _update_conversion_rate(self):
-        if self._conversion_rate is None or self._currency is None:
-            return
-        rate = float(self._hass.states.get(self._conversion_rate).state)
+        rate = self._get_conversion_rate()
         for attribute in self._state_attributes:
             if (
                 attribute in CURRENCY_ATTRIBUTE
@@ -293,10 +304,15 @@ class AvanzaStockSensor(Entity):
                     self._state_attributes[attribute] * rate, 2
                 )
         self._state = round(self._state * rate, 2)
-        self._unit_of_measurement = self._currency
 
-    def update_dividends(self, dividends):
-        """Update dividend attributes."""
+    def _get_conversion_rate(self):
+        if self._conversion_rate is None or self._currency is None:
+            return 1
+        else:
+            return float(self._hass.states.get(self._conversion_rate).state)
+
+    def _update_dividends(self, data):
+        dividends = data.get("dividends", [])
         # Create empty dividend attributes, will be overwritten with valid
         # data if information is available
         for dividend_condition in MONITORED_CONDITIONS_DIVIDENDS:
