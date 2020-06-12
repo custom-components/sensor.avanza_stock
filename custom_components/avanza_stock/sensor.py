@@ -11,6 +11,8 @@ import homeassistant.helpers.config_validation as cv
 import pyavanza
 import voluptuous as vol
 from custom_components.avanza_stock.const import (
+    CHANGE_PERCENT_PRICE_MAPPING,
+    CHANGE_PRICE_MAPPING,
     CONF_CONVERSION_RATE,
     CONF_PURCHASE_PRICE,
     CONF_SHARES,
@@ -22,6 +24,7 @@ from custom_components.avanza_stock.const import (
     MONITORED_CONDITIONS_DEFAULT,
     MONITORED_CONDITIONS_DIVIDENDS,
     MONITORED_CONDITIONS_KEYRATIOS,
+    TOTAL_CHANGE_PRICE_MAPPING,
 )
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (
@@ -205,16 +208,7 @@ class AvanzaStockSensor(Entity):
                 self._state_attributes[condition] = data.get(condition, None)
 
             if condition == "change":
-                for (change, price) in [
-                    ("changeOneWeek", "priceOneWeekAgo"),
-                    ("changeOneMonth", "priceOneMonthAgo"),
-                    ("changeThreeMonths", "priceThreeMonthsAgo"),
-                    ("changeSixMonths", "priceSixMonthsAgo"),
-                    ("changeOneYear", "priceOneYearAgo"),
-                    ("changeThreeYears", "priceThreeYearsAgo"),
-                    ("changeFiveYears", "priceFiveYearsAgo"),
-                    ("changeCurrentYear", "priceAtStartOfYear"),
-                ]:
+                for (change, price) in CHANGE_PRICE_MAPPING:
                     if price in data:
                         self._state_attributes[change] = round(
                             data["lastPrice"] - data[price], 2
@@ -223,16 +217,7 @@ class AvanzaStockSensor(Entity):
                         self._state_attributes[change] = "unknown"
 
                 if self._shares is not None:
-                    for (change, price) in [
-                        ("totalChangeOneWeek", "priceOneWeekAgo"),
-                        ("totalChangeOneMonth", "priceOneMonthAgo"),
-                        ("totalChangeThreeMonths", "priceThreeMonthsAgo",),
-                        ("totalChangeSixMonths", "priceSixMonthsAgo"),
-                        ("totalChangeOneYear", "priceOneYearAgo"),
-                        ("totalChangeThreeYears", "priceThreeYearsAgo",),
-                        ("totalChangeFiveYears", "priceFiveYearsAgo"),
-                        ("totalChangeCurrentYear", "priceAtStartOfYear",),
-                    ]:
+                    for (change, price) in TOTAL_CHANGE_PRICE_MAPPING:
                         if price in data:
                             self._state_attributes[change] = round(
                                 self._shares * (data["lastPrice"] - data[price]), 2
@@ -241,16 +226,7 @@ class AvanzaStockSensor(Entity):
                             self._state_attributes[change] = "unknown"
 
             if condition == "changePercent":
-                for (change, price) in [
-                    ("changePercentOneWeek", "priceOneWeekAgo"),
-                    ("changePercentOneMonth", "priceOneMonthAgo"),
-                    ("changePercentThreeMonths", "priceThreeMonthsAgo",),
-                    ("changePercentSixMonths", "priceSixMonthsAgo"),
-                    ("changePercentOneYear", "priceOneYearAgo"),
-                    ("changePercentThreeYears", "priceThreeYearsAgo"),
-                    ("changePercentFiveYears", "priceFiveYearsAgo"),
-                    ("changePercentCurrentYear", "priceAtStartOfYear"),
-                ]:
+                for (change, price) in CHANGE_PERCENT_PRICE_MAPPING:
                     if price in data:
                         self._state_attributes[change] = round(
                             100 * (data["lastPrice"] - data[price]) / data[price], 2
@@ -284,7 +260,7 @@ class AvanzaStockSensor(Entity):
                 price - self._purchase_price, 2
             )
             self._state_attributes["profitLossPercentage"] = round(
-                100 * (price - self._purchase_price) / self._purchase_price, 2,
+                100 * (price - self._purchase_price) / self._purchase_price, 2
             )
 
             if self._shares is not None:

@@ -76,6 +76,39 @@ MONITORED_CONDITIONS_DEFAULT = [
     "name",
 ]
 
+CHANGE_PRICE_MAPPING = [
+    ("changeOneWeek", "priceOneWeekAgo"),
+    ("changeOneMonth", "priceOneMonthAgo"),
+    ("changeThreeMonths", "priceThreeMonthsAgo"),
+    ("changeSixMonths", "priceSixMonthsAgo"),
+    ("changeOneYear", "priceOneYearAgo"),
+    ("changeThreeYears", "priceThreeYearsAgo"),
+    ("changeFiveYears", "priceFiveYearsAgo"),
+    ("changeCurrentYear", "priceAtStartOfYear"),
+]
+
+TOTAL_CHANGE_PRICE_MAPPING = [
+    ("totalChangeOneWeek", "priceOneWeekAgo"),
+    ("totalChangeOneMonth", "priceOneMonthAgo"),
+    ("totalChangeThreeMonths", "priceThreeMonthsAgo",),
+    ("totalChangeSixMonths", "priceSixMonthsAgo"),
+    ("totalChangeOneYear", "priceOneYearAgo"),
+    ("totalChangeThreeYears", "priceThreeYearsAgo",),
+    ("totalChangeFiveYears", "priceFiveYearsAgo"),
+    ("totalChangeCurrentYear", "priceAtStartOfYear",),
+]
+
+CHANGE_PERCENT_PRICE_MAPPING = [
+    ("changePercentOneWeek", "priceOneWeekAgo"),
+    ("changePercentOneMonth", "priceOneMonthAgo"),
+    ("changePercentThreeMonths", "priceThreeMonthsAgo",),
+    ("changePercentSixMonths", "priceSixMonthsAgo"),
+    ("changePercentOneYear", "priceOneYearAgo"),
+    ("changePercentThreeYears", "priceThreeYearsAgo"),
+    ("changePercentFiveYears", "priceFiveYearsAgo"),
+    ("changePercentCurrentYear", "priceAtStartOfYear"),
+]
+
 CURRENCY_ATTRIBUTE = [
     "change",
     "highestPrice",
