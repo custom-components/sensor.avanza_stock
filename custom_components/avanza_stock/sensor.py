@@ -13,7 +13,7 @@ import voluptuous as vol
 from custom_components.avanza_stock.const import (
     CHANGE_PERCENT_PRICE_MAPPING,
     CHANGE_PRICE_MAPPING,
-    CONF_CONVERSION_RATE,
+    CONF_CONVERSION_CURRENCY,
     CONF_PURCHASE_PRICE,
     CONF_SHARES,
     CONF_STOCK,
@@ -27,12 +27,7 @@ from custom_components.avanza_stock.const import (
     TOTAL_CHANGE_PRICE_MAPPING,
 )
 from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.const import (
-    CONF_CURRENCY,
-    CONF_ID,
-    CONF_MONITORED_CONDITIONS,
-    CONF_NAME,
-)
+from homeassistant.const import CONF_ID, CONF_MONITORED_CONDITIONS, CONF_NAME
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers.entity import Entity
 
@@ -46,8 +41,7 @@ STOCK_SCHEMA = vol.Schema(
         vol.Optional(CONF_NAME): cv.string,
         vol.Optional(CONF_SHARES): vol.Coerce(float),
         vol.Optional(CONF_PURCHASE_PRICE): vol.Coerce(float),
-        vol.Inclusive(CONF_CONVERSION_RATE, "currency"): cv.entity_id,
-        vol.Inclusive(CONF_CURRENCY, "currency"): cv.string,
+        vol.Optional(CONF_CONVERSION_CURRENCY): cv.positive_int,
     }
 )
 
@@ -59,8 +53,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_NAME): cv.string,
         vol.Optional(CONF_SHARES): vol.Coerce(float),
         vol.Optional(CONF_PURCHASE_PRICE): vol.Coerce(float),
-        vol.Inclusive(CONF_CONVERSION_RATE, "currency"): cv.entity_id,
-        vol.Inclusive(CONF_CURRENCY, "currency"): cv.string,
+        vol.Optional(CONF_CONVERSION_CURRENCY): cv.positive_int,
         vol.Optional(
             CONF_MONITORED_CONDITIONS, default=MONITORED_CONDITIONS_DEFAULT
         ): vol.All(cv.ensure_list, [vol.In(MONITORED_CONDITIONS)]),
@@ -78,8 +71,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         name = config.get(CONF_NAME)
         shares = config.get(CONF_SHARES)
         purchase_price = config.get(CONF_PURCHASE_PRICE)
-        conversion_rate = config.get(CONF_CONVERSION_RATE)
-        currency = config.get(CONF_CURRENCY)
+        conversion_currency = config.get(CONF_CONVERSION_CURRENCY)
         if name is None:
             name = DEFAULT_NAME + " " + str(stock)
         entities.append(
@@ -89,8 +81,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                 name,
                 shares,
                 purchase_price,
-                conversion_rate,
-                currency,
+                conversion_currency,
                 monitored_conditions,
                 session,
             )
@@ -104,8 +95,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                 name = DEFAULT_NAME + " " + str(id)
             shares = s.get(CONF_SHARES)
             purchase_price = s.get(CONF_PURCHASE_PRICE)
-            conversion_rate = s.get(CONF_CONVERSION_RATE)
-            currency = s.get(CONF_CURRENCY)
+            conversion_currency = s.get(CONF_CONVERSION_CURRENCY)
             entities.append(
                 AvanzaStockSensor(
                     hass,
@@ -113,8 +103,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                     name,
                     shares,
                     purchase_price,
-                    conversion_rate,
-                    currency,
+                    conversion_currency,
                     monitored_conditions,
                     session,
                 )
@@ -133,8 +122,7 @@ class AvanzaStockSensor(Entity):
         name,
         shares,
         purchase_price,
-        conversion_rate,
-        currency,
+        conversion_currency,
         monitored_conditions,
         session,
     ):
@@ -144,8 +132,7 @@ class AvanzaStockSensor(Entity):
         self._name = name
         self._shares = shares
         self._purchase_price = purchase_price
-        self._conversion_rate = conversion_rate
-        self._currency = currency
+        self._conversion_currency = conversion_currency
         self._monitored_conditions = monitored_conditions
         self._session = session
         self._icon = "mdi:cash"
@@ -181,20 +168,23 @@ class AvanzaStockSensor(Entity):
     async def async_update(self):
         """Update state and attributes."""
         data = await pyavanza.get_stock_async(self._session, self._stock)
+        data_conversion_currency = None
+        if self._conversion_currency:
+            data_conversion_currency = await pyavanza.get_stock_async(
+                self._session, self._conversion_currency
+            )
         if data:
             self._update_state(data)
             self._update_unit_of_measurement(data)
             self._update_state_attributes(data)
-            self._update_conversion_rate()
+            if data_conversion_currency:
+                self._update_conversion_rate(data_conversion_currency)
 
     def _update_state(self, data):
         self._state = data["lastPrice"]
 
     def _update_unit_of_measurement(self, data):
-        if self._conversion_rate is None or self._currency is None:
-            self._unit_of_measurement = data["currency"]
-        else:
-            self._unit_of_measurement = self._currency
+        self._unit_of_measurement = data["currency"]
 
     def _update_state_attributes(self, data):
         for condition in self._monitored_conditions:
@@ -268,8 +258,10 @@ class AvanzaStockSensor(Entity):
                     self._shares * (price - self._purchase_price), 2
                 )
 
-    def _update_conversion_rate(self):
-        rate = self._get_conversion_rate()
+    def _update_conversion_rate(self, data):
+        rate = data["lastPrice"]
+        self._state = round(self._state * rate, 2)
+        self._unit_of_measurement = data["currency"]
         for attribute in self._state_attributes:
             if (
                 attribute in CURRENCY_ATTRIBUTE
@@ -279,13 +271,6 @@ class AvanzaStockSensor(Entity):
                 self._state_attributes[attribute] = round(
                     self._state_attributes[attribute] * rate, 2
                 )
-        self._state = round(self._state * rate, 2)
-
-    def _get_conversion_rate(self):
-        if self._conversion_rate is None or self._currency is None:
-            return 1
-        else:
-            return float(self._hass.states.get(self._conversion_rate).state)
 
     def _update_dividends(self, data):
         dividends = data.get("dividends", [])

@@ -6,7 +6,7 @@ DEFAULT_NAME = "Avanza Stock"
 CONF_STOCK = "stock"
 CONF_SHARES = "shares"
 CONF_PURCHASE_PRICE = "purchase_price"
-CONF_CONVERSION_RATE = "conversion_rate"
+CONF_CONVERSION_CURRENCY = "conversion_currency"
 
 MONITORED_CONDITIONS = [
     "change",
