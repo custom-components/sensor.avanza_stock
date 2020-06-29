@@ -28,6 +28,7 @@ key | type | description
 **name (Optional)** | string | Custom name for the sensor. Default `avanza_stock_{stock}`. Redundant if stock is defined as a list.
 **shares (Optional)** | number | The number of shares you own of this stock, can be fractional. Redundant if stock is defined as a list.
 **purchase_price (Optional)** | number | The price paid when stock was purchased.
+**conversion_currency (Optional)** | number | The index id used for currency conversion. Also see below how to find the id.
 **monitored_conditions (Optional)** | list | Defines the attributes of the sensor, see below.
 
 ### Stock configuration
@@ -37,6 +38,7 @@ key | type | description
 **name (Optional)** |string | Custom name for the sensor. Default `avanza_stock_{stock}`.
 **shares (Optional)** | number | The number of shares you own of this stock, can be fractional.
 **purchase_price (Optional)** | number | The price paid when stock was purchased.
+**conversion_currency (Optional)** | number | The index id used for currency conversion, see below how to find it.
 
 ### Monitored conditions
 The following attributes are tracked if `monitored_conditions` is not defined.
@@ -91,7 +93,7 @@ Full list of available attributes.
 * tradable
 * volatility
 
-### Finding stock id
+### Finding stock or index id
 Got to [Avanza](https://www.avanza.se) and search for the stock you want to track. In the resulting url there is a number, this is the stock id needed for the configuration. Even though it is a Swedish bank it is possible to find stocks from the following countries:
 * Sweden
 * USA
