@@ -164,7 +164,8 @@ sensor:
 ```
 
 ## Changelog
-* 1.0.3  - All to define multiple stocks
+* 1.0.4  - Configure conversion currency and define purchase price
+* 1.0.3  - Allow to define multiple stocks
 * 1.0.2  - Async update
 * 1.0.1  - Allow fractional shares, add more change attributes
 * 1.0.0  - Add number of shares as optional configuration
