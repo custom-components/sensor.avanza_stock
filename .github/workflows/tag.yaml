@@ -14,8 +14,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - run: git fetch --unshallow
-
       - id: changelog
         run: |
           curr_tag=$(git describe --tags --abbrev=0)
