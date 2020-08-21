@@ -14,6 +14,7 @@ from custom_components.avanza_stock.const import (
     CHANGE_PERCENT_PRICE_MAPPING,
     CHANGE_PRICE_MAPPING,
     CONF_CONVERSION_CURRENCY,
+    CONF_INVERT_CONVERSION_CURRENCY,
     CONF_PURCHASE_PRICE,
     CONF_SHARES,
     CONF_STOCK,
@@ -42,6 +43,7 @@ STOCK_SCHEMA = vol.Schema(
         vol.Optional(CONF_SHARES): vol.Coerce(float),
         vol.Optional(CONF_PURCHASE_PRICE): vol.Coerce(float),
         vol.Optional(CONF_CONVERSION_CURRENCY): cv.positive_int,
+        vol.Optional(CONF_INVERT_CONVERSION_CURRENCY, default=False): cv.boolean,
     }
 )
 
@@ -54,6 +56,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_SHARES): vol.Coerce(float),
         vol.Optional(CONF_PURCHASE_PRICE): vol.Coerce(float),
         vol.Optional(CONF_CONVERSION_CURRENCY): cv.positive_int,
+        vol.Optional(CONF_INVERT_CONVERSION_CURRENCY, default=False): cv.boolean,
         vol.Optional(
             CONF_MONITORED_CONDITIONS, default=MONITORED_CONDITIONS_DEFAULT
         ): vol.All(cv.ensure_list, [vol.In(MONITORED_CONDITIONS)]),
@@ -72,6 +75,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         shares = config.get(CONF_SHARES)
         purchase_price = config.get(CONF_PURCHASE_PRICE)
         conversion_currency = config.get(CONF_CONVERSION_CURRENCY)
+        invert_conversion_currency = config.get(CONF_INVERT_CONVERSION_CURRENCY)
         if name is None:
             name = DEFAULT_NAME + " " + str(stock)
         entities.append(
@@ -82,6 +86,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                 shares,
                 purchase_price,
                 conversion_currency,
+                invert_conversion_currency,
                 monitored_conditions,
                 session,
             )
@@ -96,6 +101,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
             shares = s.get(CONF_SHARES)
             purchase_price = s.get(CONF_PURCHASE_PRICE)
             conversion_currency = s.get(CONF_CONVERSION_CURRENCY)
+            invert_conversion_currency = s.get(CONF_INVERT_CONVERSION_CURRENCY)
             entities.append(
                 AvanzaStockSensor(
                     hass,
@@ -104,6 +110,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                     shares,
                     purchase_price,
                     conversion_currency,
+                    invert_conversion_currency,
                     monitored_conditions,
                     session,
                 )
@@ -123,6 +130,7 @@ class AvanzaStockSensor(Entity):
         shares,
         purchase_price,
         conversion_currency,
+        invert_conversion_currency,
         monitored_conditions,
         session,
     ):
@@ -133,6 +141,7 @@ class AvanzaStockSensor(Entity):
         self._shares = shares
         self._purchase_price = purchase_price
         self._conversion_currency = conversion_currency
+        self._invert_conversion_currency = invert_conversion_currency
         self._monitored_conditions = monitored_conditions
         self._session = session
         self._icon = "mdi:cash"
@@ -260,6 +269,8 @@ class AvanzaStockSensor(Entity):
 
     def _update_conversion_rate(self, data):
         rate = data["lastPrice"]
+        if self._invert_conversion_currency:
+            rate = 1.0 / rate
         self._state = round(self._state * rate, 2)
         self._unit_of_measurement = data["currency"]
         for attribute in self._state_attributes:

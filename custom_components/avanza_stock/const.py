@@ -1,5 +1,5 @@
 """Constants for avanza_stock."""
-__version__ = "1.0.4"
+__version__ = "1.0.5"
 
 DEFAULT_NAME = "Avanza Stock"
 
@@ -7,6 +7,7 @@ CONF_STOCK = "stock"
 CONF_SHARES = "shares"
 CONF_PURCHASE_PRICE = "purchase_price"
 CONF_CONVERSION_CURRENCY = "conversion_currency"
+CONF_INVERT_CONVERSION_CURRENCY = "invert_conversion_currency"
 
 MONITORED_CONDITIONS = [
     "change",
