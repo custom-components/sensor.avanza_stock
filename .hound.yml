@@ -2,5 +2,5 @@
 fail_on_violations: true
 
 flake8:
-  enabled: true
+  enabled: false
   config_file: .flake8
