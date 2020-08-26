@@ -36,12 +36,12 @@ jobs:
           pip install black==19.10b0
           pip install flake8==3.8.1
           pip install flake8-docstrings==1.5.0
-          pip install isort==5.4.2
+          pip install isort==4.3.21
           pip install yamllint==1.23.0
       - run: |
-          black .
-          flake8 .
-          isort .
+          black --check .
+          flake8 --count
+          isort --check-only
           yamllint .
 
       - run: if git ls-files | xargs file | grep CRLF; then exit 1; fi
