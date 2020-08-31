@@ -44,4 +44,11 @@ jobs:
           isort --check-only
           yamllint .
 
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14'
+
+      - run: npm install -g markdownlint-cli@0.23.1
+      - run: markdownlint .
+
       - run: if git ls-files | xargs file | grep CRLF; then exit 1; fi
