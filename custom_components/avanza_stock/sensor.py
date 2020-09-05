@@ -272,7 +272,10 @@ class AvanzaStockSensor(Entity):
         if self._invert_conversion_currency:
             rate = 1.0 / rate
         self._state = round(self._state * rate, 2)
-        self._unit_of_measurement = data["currency"]
+        if self._invert_conversion_currency:
+            self._unit_of_measurement = data["name"].split("/")[0]
+        else:
+            self._unit_of_measurement = data["name"].split("/")[1]
         for attribute in self._state_attributes:
             if (
                 attribute in CURRENCY_ATTRIBUTE
