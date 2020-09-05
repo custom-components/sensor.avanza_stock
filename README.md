@@ -117,6 +117,7 @@ sensor:
 
 ## Changelog
 
+- 1.0.6  - Correct unit when using conversion currency
 - 1.0.5  - Add option to invert conversion currency
 - 1.0.4  - Configure conversion currency and define purchase price
 - 1.0.3  - Allow to define multiple stocks
