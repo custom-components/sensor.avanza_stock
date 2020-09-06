@@ -291,7 +291,7 @@ class AvanzaStockSensor(Entity):
         # Create empty dividend attributes, will be overwritten with valid
         # data if information is available
         for dividend_condition in MONITORED_CONDITIONS_DIVIDENDS:
-            attribute = "dividend0_{0}".format(dividend_condition)
+            attribute = "dividend0_{}".format(dividend_condition)
             self._state_attributes[attribute] = "unknown"
 
         # Check that each dividend has the attributes needed.
@@ -319,6 +319,6 @@ class AvanzaStockSensor(Entity):
             paymentDate = datetime.strptime(dividend["paymentDate"], "%Y-%m-%d")
             if paymentDate >= today:
                 for dividend_condition in MONITORED_CONDITIONS_DIVIDENDS:
-                    attribute = "dividend{0}_{1}".format(i, dividend_condition)
+                    attribute = "dividend{}_{}".format(i, dividend_condition)
                     self._state_attributes[attribute] = dividend[dividend_condition]
                 i += 1
