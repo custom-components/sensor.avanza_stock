@@ -37,11 +37,13 @@ jobs:
           pip install flake8==3.8.1
           pip install flake8-docstrings==1.5.0
           pip install isort==4.3.21
+          pip install pyupgrade==2.7.2
           pip install yamllint==1.23.0
       - run: |
           black --check .
           flake8 --count
           isort --check-only
+          pyupgrade custom_components/avanza_stock/*.py
           yamllint .
 
       - uses: actions/setup-node@v1
