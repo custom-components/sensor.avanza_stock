@@ -33,7 +33,8 @@ key | type | description
 **purchase_price (Optional)**              | number        | Price paid when stock was purchased. Redundant if stock is defined as a list.
 **conversion_currency (Optional)**         | number        | Index id used for currency conversion, see [here](#finding-stock-or-conversion-currency).
 **monitored_conditions (Optional)**        | list          | Attributes to monitor, see [here](#monitored-conditions).
-**invert_connversion_currency (Optional)** | boolean       | Wether or not to invert the conversion currency, default false.
+**invert_conversion_currency (Optional)** | boolean       | Wether or not to invert the conversion currency, default false.
+**currency (Optional)**                    | string        | Overwrite currency given by the api.
 
 ### Stock configuration
 
@@ -44,7 +45,8 @@ key | type | description
 **shares (Optional)**                      | number  | Number of shares, can be fractional.
 **purchase_price (Optional)**              | number  | Price paid when stock was purchased.
 **conversion_currency (Optional)**         | number  | Index id used for currency conversion, see [here](#finding-stock-or-conversion-currency).
-**invert_connversion_currency (Optional)** | boolean | Wether or not to invert the conversion currency, default false.
+**invert_conversion_currency (Optional)** | boolean | Wether or not to invert the conversion currency, default false.
+**currency (Optional)**                    | string  | Overwrite currency given by the api.
 
 ### Monitored conditions
 
@@ -117,6 +119,7 @@ sensor:
 
 ## Changelog
 
+- 1.0.7  - Overwrite currency given by the api
 - 1.0.6  - Correct unit when using conversion currency
 - 1.0.5  - Add option to invert conversion currency
 - 1.0.4  - Configure conversion currency and define purchase price
