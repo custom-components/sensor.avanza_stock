@@ -28,7 +28,12 @@ from custom_components.avanza_stock.const import (
     TOTAL_CHANGE_PRICE_MAPPING,
 )
 from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.const import CONF_ID, CONF_MONITORED_CONDITIONS, CONF_NAME
+from homeassistant.const import (
+    CONF_CURRENCY,
+    CONF_ID,
+    CONF_MONITORED_CONDITIONS,
+    CONF_NAME,
+)
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers.entity import Entity
 
@@ -44,6 +49,7 @@ STOCK_SCHEMA = vol.Schema(
         vol.Optional(CONF_PURCHASE_PRICE): vol.Coerce(float),
         vol.Optional(CONF_CONVERSION_CURRENCY): cv.positive_int,
         vol.Optional(CONF_INVERT_CONVERSION_CURRENCY, default=False): cv.boolean,
+        vol.Optional(CONF_CURRENCY): cv.string,
     }
 )
 
@@ -57,6 +63,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_PURCHASE_PRICE): vol.Coerce(float),
         vol.Optional(CONF_CONVERSION_CURRENCY): cv.positive_int,
         vol.Optional(CONF_INVERT_CONVERSION_CURRENCY, default=False): cv.boolean,
+        vol.Optional(CONF_CURRENCY): cv.string,
         vol.Optional(
             CONF_MONITORED_CONDITIONS, default=MONITORED_CONDITIONS_DEFAULT
         ): vol.All(cv.ensure_list, [vol.In(MONITORED_CONDITIONS)]),
@@ -76,6 +83,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         purchase_price = config.get(CONF_PURCHASE_PRICE)
         conversion_currency = config.get(CONF_CONVERSION_CURRENCY)
         invert_conversion_currency = config.get(CONF_INVERT_CONVERSION_CURRENCY)
+        currency = config.get(CONF_CURRENCY)
         if name is None:
             name = DEFAULT_NAME + " " + str(stock)
         entities.append(
@@ -87,6 +95,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                 purchase_price,
                 conversion_currency,
                 invert_conversion_currency,
+                currency,
                 monitored_conditions,
                 session,
             )
@@ -102,6 +111,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
             purchase_price = s.get(CONF_PURCHASE_PRICE)
             conversion_currency = s.get(CONF_CONVERSION_CURRENCY)
             invert_conversion_currency = s.get(CONF_INVERT_CONVERSION_CURRENCY)
+            currency = s.get(CONF_CURRENCY)
             entities.append(
                 AvanzaStockSensor(
                     hass,
@@ -111,6 +121,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                     purchase_price,
                     conversion_currency,
                     invert_conversion_currency,
+                    currency,
                     monitored_conditions,
                     session,
                 )
@@ -131,6 +142,7 @@ class AvanzaStockSensor(Entity):
         purchase_price,
         conversion_currency,
         invert_conversion_currency,
+        currency,
         monitored_conditions,
         session,
     ):
@@ -142,6 +154,7 @@ class AvanzaStockSensor(Entity):
         self._purchase_price = purchase_price
         self._conversion_currency = conversion_currency
         self._invert_conversion_currency = invert_conversion_currency
+        self._currency = currency
         self._monitored_conditions = monitored_conditions
         self._session = session
         self._icon = "mdi:cash"
@@ -188,6 +201,8 @@ class AvanzaStockSensor(Entity):
             self._update_state_attributes(data)
             if data_conversion_currency:
                 self._update_conversion_rate(data_conversion_currency)
+            if self._currency:
+                self._unit_of_measurement = self._currency
 
     def _update_state(self, data):
         self._state = data["lastPrice"]
