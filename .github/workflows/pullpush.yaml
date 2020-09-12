@@ -32,25 +32,6 @@ jobs:
       - uses: "actions/setup-python@v1"
         with:
           python-version: "3.x"
-      - run: |
-          pip install black==20.8b1
-          pip install flake8==3.8.1
-          pip install flake8-docstrings==1.5.0
-          pip install isort==4.3.21
-          pip install pyupgrade==2.7.2
-          pip install yamllint==1.23.0
-      - run: |
-          black --check .
-          flake8 --count
-          isort --check-only
-          pyupgrade custom_components/avanza_stock/*.py
-          yamllint .
-
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '14'
-
-      - run: npm install -g markdownlint-cli@0.23.1
-      - run: markdownlint .
-
+      - run: pip install pre-commit==2.9.3
+      - run: pre-commit run --all-files
       - run: if git ls-files | xargs file | grep CRLF; then exit 1; fi

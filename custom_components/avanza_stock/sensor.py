@@ -10,6 +10,16 @@ from datetime import datetime, timedelta
 import homeassistant.helpers.config_validation as cv
 import pyavanza
 import voluptuous as vol
+from homeassistant.components.sensor import PLATFORM_SCHEMA
+from homeassistant.const import (
+    CONF_CURRENCY,
+    CONF_ID,
+    CONF_MONITORED_CONDITIONS,
+    CONF_NAME,
+)
+from homeassistant.helpers.aiohttp_client import async_create_clientsession
+from homeassistant.helpers.entity import Entity
+
 from custom_components.avanza_stock.const import (
     CHANGE_PERCENT_PRICE_MAPPING,
     CHANGE_PRICE_MAPPING,
@@ -27,15 +37,6 @@ from custom_components.avanza_stock.const import (
     MONITORED_CONDITIONS_KEYRATIOS,
     TOTAL_CHANGE_PRICE_MAPPING,
 )
-from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.const import (
-    CONF_CURRENCY,
-    CONF_ID,
-    CONF_MONITORED_CONDITIONS,
-    CONF_NAME,
-)
-from homeassistant.helpers.aiohttp_client import async_create_clientsession
-from homeassistant.helpers.entity import Entity
 
 _LOGGER = logging.getLogger(__name__)
 
