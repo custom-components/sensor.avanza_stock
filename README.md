@@ -54,7 +54,7 @@ If no `monitored_conditions` is defined, change, changePercent and name will be 
 
 ### Finding stock or conversion currency
 
-Got to [Avanza](https://www.avanza.se) and search for the stock you want to track. In the resulting url there is a number, this is the stock id needed for the configuration. Even though it is a Swedish bank it is possible to find stocks from the following countries: Sweden, USA, Denmark, Norway, Finland, Canada, Belgium, France, Italy, Netherlands, Portugal and Germany.
+Got to [Avanza](https://www.avanza.se) and search for the stock you want to track. In the resulting url there is a number, this is the stock id needed for the configuration. Even though it is a Swedish bank it is possible to find stocks from the following countries: Sweden, USA, Denmark, Norway, Finland, Canada, Belgium, France, Italy, Netherlands, Portugal and Germany. To find conversion currencies search for example "USD/SEK" and look for the id in the resulting url. If you can not find your conversion try and search the reverse (NOK/SEK instead of SEK/NOK) and use the `invert_conversion_currency` to get your preffered currency.
 
 ## Example
 
@@ -93,6 +93,27 @@ sensor:
       - totalValueTraded
 ```
 
+**Configuration with conversion currency:**
+
+```yaml
+sensor:
+  - platform: avanza_stock
+    stock:
+      - id: 238449
+        name: TESLA USD
+        shares: 1
+        purchase_price: 600
+      - id: 238449
+        name: TESLA SEK
+        shares: 1
+        conversion_currency: 19000
+        purchase_price: 7000
+      - id: 5361
+        name: Avanza Bank Holding (NOK)
+        conversion_currency: 53293
+        invert_conversion_currency: true
+```
+
 ## Usage
 
 **Automation to send summary at 18:00 using telegram:**
@@ -119,6 +140,7 @@ sensor:
 
 ## Changelog
 
+- 1.0.8  - Correct profit/loss when using conversion currency
 - 1.0.7  - Overwrite currency given by the api
 - 1.0.6  - Correct unit when using conversion currency
 - 1.0.5  - Add option to invert conversion currency
