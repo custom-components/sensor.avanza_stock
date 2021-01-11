@@ -300,6 +300,7 @@ class AvanzaStockSensor(Entity):
                 self._state_attributes[attribute] = round(
                     self._state_attributes[attribute] * rate, 2
                 )
+        self._update_profit_loss(self._state)
 
     def _update_dividends(self, data):
         dividends = data.get("dividends", [])
