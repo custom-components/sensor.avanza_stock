@@ -142,6 +142,7 @@ sensor:
 
 ## Changelog
 
+- 1.0.9  - Add purchase date attribute (string manually set by user)
 - 1.0.8  - Correct profit/loss when using conversion currency
 - 1.0.7  - Overwrite currency given by the api
 - 1.0.6  - Correct unit when using conversion currency
