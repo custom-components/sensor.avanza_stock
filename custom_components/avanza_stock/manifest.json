@@ -3,6 +3,7 @@
     "name": "Avanza Stock",
     "version": "1.0.9",
     "documentation": "https://github.com/custom-components/sensor.avanza_stock",
+    "issue_tracker": "https://github.com/custom-components/sensor.avanza_stock/issues",
     "dependencies": [],
     "codeowners": ["@claha"],
     "requirements": ["pyavanza==0.2.2"]
