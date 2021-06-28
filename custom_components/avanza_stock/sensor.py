@@ -318,9 +318,12 @@ class AvanzaStockSensor(Entity):
         dividends = data.get("dividends", [])
         # Create empty dividend attributes, will be overwritten with valid
         # data if information is available
+        attributes_to_remove = []
         for key in self._state_attributes:
             if key.startswith("dividend"):
-                self._state_attributes.pop(key)
+                attributes_to_remove.append(key)
+        for attribute in attributes_to_remove:
+            self._state_attributes.pop(attribute)
         for dividend_condition in MONITORED_CONDITIONS_DIVIDENDS:
             attribute = "dividend0_{}".format(dividend_condition)
             self._state_attributes[attribute] = "unknown"
