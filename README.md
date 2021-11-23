@@ -30,8 +30,8 @@ key | type | description
 **stock (Required)**                       | number / list | Stock id or list of stocks, see [here](#stock-configuration) and [here](#finding-stock-or-conversion-currency).
 **name (Optional)**                        | string        | Name of the sensor. Default `avanza_stock_{stock}`. Redundant if stock is defined as a list.
 **shares (Optional)**                      | number        | Number of shar, can be fractional. Redundant if stock is defined as a list.
-**purchase_date (Optional)**                | string        | Date when stock was purchased. Redundant if stock is defined as a list.
-**purchase_price (Optional)**              | number        | Price paid when stock was purchased. Redundant if stock is defined as a list.
+**purchase_date (Optional)**                | string        | Date when stock was purchased. Redundant if stock is defined as a list. Does not get processed further.
+**purchase_price (Optional)**              | number        | Price paid when stock was purchased (per share). Redundant if stock is defined as a list.
 **conversion_currency (Optional)**         | number        | Index id used for currency conversion, see [here](#finding-stock-or-conversion-currency).
 **monitored_conditions (Optional)**        | list          | Attributes to monitor, see [here](#monitored-conditions).
 **invert_conversion_currency (Optional)** | boolean       | Wether or not to invert the conversion currency, default false.
@@ -44,8 +44,8 @@ key | type | description
 **id (Required)**                          | number  | Stock id, see [here](#finding-stock-or-conversion-currency).
 **name (Optional)**                        | string  | Name of the sensor. Default `avanza_stock_{stock}`.
 **shares (Optional)**                      | number  | Number of shares, can be fractional.
-**purchase_date (Optional)**               | string  | Date when stock was purchased.
-**purchase_price (Optional)**              | number  | Price paid when stock was purchased.
+**purchase_date (Optional)**               | string  | Date when stock was purchased. Does not get processed further.
+**purchase_price (Optional)**              | number  | Price paid when stock was purchased (per share).
 **conversion_currency (Optional)**         | number  | Index id used for currency conversion, see [here](#finding-stock-or-conversion-currency).
 **invert_conversion_currency (Optional)** | boolean | Wether or not to invert the conversion currency, default false.
 **currency (Optional)**                    | string  | Overwrite currency given by the api.
