@@ -4,7 +4,7 @@ name: Push/Pull actions
 on:  # yamllint disable-line rule:truthy
   push:
     branches:
-      - master
+      - main
 
   pull_request:
 
