@@ -106,7 +106,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                 session,
             )
         )
-        _LOGGER.info("Tracking %s [%d] using Avanza" % (name, stock))
+        _LOGGER.debug("Tracking %s [%d] using Avanza" % (name, stock))
     else:
         for s in stock:
             id = s.get(CONF_ID)
@@ -134,7 +134,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                     session,
                 )
             )
-            _LOGGER.info("Tracking %s [%d] using Avanza" % (name, id))
+            _LOGGER.debug("Tracking %s [%d] using Avanza" % (name, id))
     async_add_entities(entities, True)
 
 
