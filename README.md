@@ -142,6 +142,7 @@ sensor:
 
 ## Changelog
 
+- 1.0.12 - Add unique id
 - 1.0.11 - Rename device state attributes
 - 1.0.10 - Safely remove divident attributes
 - 1.0.9  - Add purchase date attribute (string manually set by user)

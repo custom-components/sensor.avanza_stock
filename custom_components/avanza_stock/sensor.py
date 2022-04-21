@@ -197,6 +197,11 @@ class AvanzaStockSensor(Entity):
         """Return the unit of measurement."""
         return self._unit_of_measurement
 
+    @property
+    def unique_id(self):
+        """Return the unique id."""
+        return f"{self._stock}_stock"
+
     async def async_update(self):
         """Update state and attributes."""
         data = await pyavanza.get_stock_async(self._session, self._stock)
