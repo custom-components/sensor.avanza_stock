@@ -10,7 +10,12 @@ from datetime import datetime, timedelta
 import homeassistant.helpers.config_validation as cv
 import pyavanza
 import voluptuous as vol
-from homeassistant.components.sensor import PLATFORM_SCHEMA
+from homeassistant.components.sensor import (
+    PLATFORM_SCHEMA,
+    SensorDeviceClass,
+    SensorEntity,
+    SensorStateClass,
+)
 from homeassistant.const import (
     CONF_CURRENCY,
     CONF_ID,
@@ -18,7 +23,6 @@ from homeassistant.const import (
     CONF_NAME,
 )
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
-from homeassistant.helpers.entity import Entity
 
 from custom_components.avanza_stock.const import (
     CHANGE_PERCENT_PRICE_MAPPING,
@@ -138,7 +142,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     async_add_entities(entities, True)
 
 
-class AvanzaStockSensor(Entity):
+class AvanzaStockSensor(SensorEntity):
     """Representation of a Avanza Stock sensor."""
 
     def __init__(
@@ -201,6 +205,16 @@ class AvanzaStockSensor(Entity):
     def unique_id(self):
         """Return the unique id."""
         return f"{self._stock}_stock"
+
+    @property
+    def state_class(self):
+        """Return the state class."""
+        return SensorStateClass.MEASUREMENT
+
+    @property
+    def device_class(self):
+        """Return the device class."""
+        return SensorDeviceClass.MONETARY
 
     async def async_update(self):
         """Update state and attributes."""
