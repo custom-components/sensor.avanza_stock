@@ -234,10 +234,10 @@ class AvanzaStockSensor(SensorEntity):
                 self._unit_of_measurement = self._currency
 
     def _update_state(self, data):
-        self._state = data["lastPrice"]
+        self._state = data["quote"]["last"]
 
     def _update_unit_of_measurement(self, data):
-        self._unit_of_measurement = data["currency"]
+        self._unit_of_measurement = data["listing"]["currency"]
 
     def _update_state_attributes(self, data):
         for condition in self._monitored_conditions:
@@ -254,7 +254,7 @@ class AvanzaStockSensor(SensorEntity):
                 for (change, price) in CHANGE_PRICE_MAPPING:
                     if price in data:
                         self._state_attributes[change] = round(
-                            data["lastPrice"] - data[price], 2
+                            data["quote"]["last"] - data[price], 2
                         )
                     else:
                         self._state_attributes[change] = "unknown"
@@ -263,7 +263,7 @@ class AvanzaStockSensor(SensorEntity):
                     for (change, price) in TOTAL_CHANGE_PRICE_MAPPING:
                         if price in data:
                             self._state_attributes[change] = round(
-                                self._shares * (data["lastPrice"] - data[price]), 2
+                                self._shares * (data["quote"]["last"] - data[price]), 2
                             )
                         else:
                             self._state_attributes[change] = "unknown"
@@ -272,7 +272,7 @@ class AvanzaStockSensor(SensorEntity):
                 for (change, price) in CHANGE_PERCENT_PRICE_MAPPING:
                     if price in data:
                         self._state_attributes[change] = round(
-                            100 * (data["lastPrice"] - data[price]) / data[price], 2
+                            100 * (data["quote"]["last"] - data[price]) / data[price], 2
                         )
                     else:
                         self._state_attributes[change] = "unknown"
@@ -280,13 +280,13 @@ class AvanzaStockSensor(SensorEntity):
         if self._shares is not None:
             self._state_attributes["shares"] = self._shares
             self._state_attributes["totalValue"] = round(
-                self._shares * data["lastPrice"], 2
+                self._shares * data["quote"]["last"], 2
             )
             self._state_attributes["totalChange"] = round(
-                self._shares * data["change"], 2
+                self._shares * data["quote"]["change"], 2
             )
 
-        self._update_profit_loss(data["lastPrice"])
+        self._update_profit_loss(data["quote"]["last"])
 
     def _update_key_ratios(self, data, attr):
         key_ratios = data.get("keyRatios", {})
@@ -314,7 +314,7 @@ class AvanzaStockSensor(SensorEntity):
                 )
 
     def _update_conversion_rate(self, data):
-        rate = data["lastPrice"]
+        rate = data["quote"]["last"]
         if self._invert_conversion_currency:
             rate = 1.0 / rate
         self._state = round(self._state * rate, 2)
