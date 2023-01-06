@@ -1,5 +1,5 @@
 """Constants for avanza_stock."""
-__version__ = "1.0.12"
+__version__ = "1.1.0"
 
 DEFAULT_NAME = "Avanza Stock"
 
@@ -76,6 +76,11 @@ MONITORED_CONDITIONS_DEFAULT = [
     "change",
     "changePercent",
     "name",
+]
+
+MONITORED_CONDITIONS_QUOTE = [
+    "change",
+    "changePercent",
 ]
 
 CHANGE_PRICE_MAPPING = [
