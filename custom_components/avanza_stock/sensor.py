@@ -40,6 +40,7 @@ from custom_components.avanza_stock.const import (
     MONITORED_CONDITIONS_DEFAULT,
     MONITORED_CONDITIONS_DIVIDENDS,
     MONITORED_CONDITIONS_KEYRATIOS,
+    MONITORED_CONDITIONS_QUOTE,
     TOTAL_CHANGE_PRICE_MAPPING,
 )
 
@@ -245,6 +246,8 @@ class AvanzaStockSensor(SensorEntity):
                 self._update_key_ratios(data, condition)
             elif condition in MONITORED_CONDITIONS_COMPANY:
                 self._update_company(data, condition)
+            elif condition in MONITORED_CONDITIONS_QUOTE:
+                self._update_quote(data, condition)
             elif condition == "dividends":
                 self._update_dividends(data)
             else:
@@ -295,6 +298,10 @@ class AvanzaStockSensor(SensorEntity):
     def _update_company(self, data, attr):
         company = data.get("company", {})
         self._state_attributes[attr] = company.get(attr, None)
+
+    def _update_quote(self, data, attr):
+        quote = data.get("quote", {})
+        self._state_attributes[attr] = quote.get(attr, None)
 
     def _update_profit_loss(self, price):
         if self._purchase_date is not None:

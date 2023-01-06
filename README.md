@@ -52,7 +52,7 @@ key | type | description
 
 ### Monitored conditions
 
-If no `monitored_conditions` is defined, change, changePercent and name will be tracked. Full list of available attributes, see [here](custom_components/avanza_stock/const.py#L12)
+If no `monitored_conditions` is defined, change, changePercent and name will be tracked. Full list of available attributes, see [here](custom_components/avanza_stock/const.py#L12) (With the new api change only change and changePercent is currently supported.)
 
 ### Finding stock or conversion currency
 
@@ -142,6 +142,7 @@ sensor:
 
 ## Changelog
 
+- 1.1.0  - Use the new api
 - 1.0.12 - Add unique id
 - 1.0.11 - Rename device state attributes
 - 1.0.10 - Safely remove divident attributes
