@@ -255,27 +255,40 @@ class AvanzaStockSensor(SensorEntity):
 
             if condition == "change":
                 for (change, price) in CHANGE_PRICE_MAPPING:
-                    if price in data:
+                    if price in data["historicalClosingPrices"]:
                         self._state_attributes[change] = round(
-                            data["quote"]["last"] - data[price], 2
+                            data["quote"]["last"]
+                            - data["historicalClosingPrices"][price],
+                            2,
                         )
                     else:
                         self._state_attributes[change] = "unknown"
 
                 if self._shares is not None:
                     for (change, price) in TOTAL_CHANGE_PRICE_MAPPING:
-                        if price in data:
+                        if price in data["historicalClosingPrices"]:
                             self._state_attributes[change] = round(
-                                self._shares * (data["quote"]["last"] - data[price]), 2
+                                self._shares
+                                * (
+                                    data["quote"]["last"]
+                                    - data["historicalClosingPrices"][price]
+                                ),
+                                2,
                             )
                         else:
                             self._state_attributes[change] = "unknown"
 
             if condition == "changePercent":
                 for (change, price) in CHANGE_PERCENT_PRICE_MAPPING:
-                    if price in data:
+                    if price in data["historicalClosingPrices"]:
                         self._state_attributes[change] = round(
-                            100 * (data["quote"]["last"] - data[price]) / data[price], 2
+                            100
+                            * (
+                                data["quote"]["last"]
+                                - data["historicalClosingPrices"][price]
+                            )
+                            / data["historicalClosingPrices"][price],
+                            2,
                         )
                     else:
                         self._state_attributes[change] = "unknown"
