@@ -142,6 +142,7 @@ sensor:
 
 ## Changelog
 
+- 1.1.1  - Fix historical changes
 - 1.1.0  - Use the new api
 - 1.0.12 - Add unique id
 - 1.0.11 - Rename device state attributes

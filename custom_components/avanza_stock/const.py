@@ -1,5 +1,5 @@
 """Constants for avanza_stock."""
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 
 DEFAULT_NAME = "Avanza Stock"
 
@@ -38,7 +38,6 @@ MONITORED_CONDITIONS = [
     "priceOneMonthAgo",
     "priceOneWeekAgo",
     "priceOneYearAgo",
-    "priceSixMonthsAgo",
     "priceThreeMonthsAgo",
     "priceThreeYearsAgo",
     "pushPermitted",
@@ -84,48 +83,48 @@ MONITORED_CONDITIONS_QUOTE = [
 ]
 
 CHANGE_PRICE_MAPPING = [
-    ("changeOneWeek", "priceOneWeekAgo"),
-    ("changeOneMonth", "priceOneMonthAgo"),
-    ("changeThreeMonths", "priceThreeMonthsAgo"),
-    ("changeSixMonths", "priceSixMonthsAgo"),
-    ("changeOneYear", "priceOneYearAgo"),
-    ("changeThreeYears", "priceThreeYearsAgo"),
-    ("changeFiveYears", "priceFiveYearsAgo"),
-    ("changeCurrentYear", "priceAtStartOfYear"),
+    ("changeOneWeek", "oneWeek"),
+    ("changeOneMonth", "oneMonth"),
+    ("changeThreeMonths", "threeMonths"),
+    ("changeOneYear", "oneYear"),
+    ("changeThreeYears", "threeYears"),
+    ("changeFiveYears", "fiveYears"),
+    ("changeTenYears", "tenYears"),
+    ("changeCurrentYear", "startOfYear"),
 ]
 
 TOTAL_CHANGE_PRICE_MAPPING = [
-    ("totalChangeOneWeek", "priceOneWeekAgo"),
-    ("totalChangeOneMonth", "priceOneMonthAgo"),
+    ("totalChangeOneWeek", "oneWeek"),
+    ("totalChangeOneMonth", "oneMonth"),
     (
         "totalChangeThreeMonths",
-        "priceThreeMonthsAgo",
+        "threeMonths",
     ),
-    ("totalChangeSixMonths", "priceSixMonthsAgo"),
-    ("totalChangeOneYear", "priceOneYearAgo"),
+    ("totalChangeOneYear", "oneYear"),
     (
         "totalChangeThreeYears",
-        "priceThreeYearsAgo",
+        "threeYears",
     ),
-    ("totalChangeFiveYears", "priceFiveYearsAgo"),
+    ("totalChangeFiveYears", "fiveYears"),
+    ("totalChangeTenYears", "tenYears"),
     (
         "totalChangeCurrentYear",
-        "priceAtStartOfYear",
+        "startOfYear",
     ),
 ]
 
 CHANGE_PERCENT_PRICE_MAPPING = [
-    ("changePercentOneWeek", "priceOneWeekAgo"),
-    ("changePercentOneMonth", "priceOneMonthAgo"),
+    ("changePercentOneWeek", "oneWeek"),
+    ("changePercentOneMonth", "oneMonth"),
     (
         "changePercentThreeMonths",
-        "priceThreeMonthsAgo",
+        "threeMonths",
     ),
-    ("changePercentSixMonths", "priceSixMonthsAgo"),
-    ("changePercentOneYear", "priceOneYearAgo"),
-    ("changePercentThreeYears", "priceThreeYearsAgo"),
-    ("changePercentFiveYears", "priceFiveYearsAgo"),
-    ("changePercentCurrentYear", "priceAtStartOfYear"),
+    ("changePercentOneYear", "oneYear"),
+    ("changePercentThreeYears", "threeYears"),
+    ("changePercentFiveYears", "fiveYears"),
+    ("changePercentTenYears", "tenYears"),
+    ("changePercentCurrentYear", "startOfYear"),
 ]
 
 CURRENCY_ATTRIBUTE = [
