@@ -5,7 +5,7 @@ For more details about this platform, please refer to the documentation at
 https://github.com/custom-components/sensor.avanza_stock/blob/master/README.md
 """
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import homeassistant.helpers.config_validation as cv
 import pyavanza
@@ -254,7 +254,7 @@ class AvanzaStockSensor(SensorEntity):
                 self._state_attributes[condition] = data.get(condition, None)
 
             if condition == "change":
-                for (change, price) in CHANGE_PRICE_MAPPING:
+                for change, price in CHANGE_PRICE_MAPPING:
                     if price in data["historicalClosingPrices"]:
                         self._state_attributes[change] = round(
                             data["quote"]["last"]
@@ -265,7 +265,7 @@ class AvanzaStockSensor(SensorEntity):
                         self._state_attributes[change] = "unknown"
 
                 if self._shares is not None:
-                    for (change, price) in TOTAL_CHANGE_PRICE_MAPPING:
+                    for change, price in TOTAL_CHANGE_PRICE_MAPPING:
                         if price in data["historicalClosingPrices"]:
                             self._state_attributes[change] = round(
                                 self._shares
@@ -279,7 +279,7 @@ class AvanzaStockSensor(SensorEntity):
                             self._state_attributes[change] = "unknown"
 
             if condition == "changePercent":
-                for (change, price) in CHANGE_PERCENT_PRICE_MAPPING:
+                for change, price in CHANGE_PERCENT_PRICE_MAPPING:
                     if price in data["historicalClosingPrices"]:
                         self._state_attributes[change] = round(
                             100
@@ -354,44 +354,14 @@ class AvanzaStockSensor(SensorEntity):
         self._update_profit_loss(self._state)
 
     def _update_dividends(self, data):
-        dividends = data.get("dividends", [])
-        # Create empty dividend attributes, will be overwritten with valid
-        # data if information is available
-        attributes_to_remove = []
-        for key in self._state_attributes:
-            if key.startswith("dividend"):
-                attributes_to_remove.append(key)
-        for attribute in attributes_to_remove:
-            self._state_attributes.pop(attribute)
+        if "keyIndicators" not in data:
+            return
+        if "dividend" not in data["keyIndicators"]:
+            return
+
+        dividend = data["keyIndicators"]["dividend"]
         for dividend_condition in MONITORED_CONDITIONS_DIVIDENDS:
-            attribute = "dividend0_{}".format(dividend_condition)
-            self._state_attributes[attribute] = "unknown"
-
-        # Check that each dividend has the attributes needed.
-        # Dividends from the past sometimes misses attributes
-        # but we are not interested in them anyway.
-        for i, dividend in reversed(list(enumerate(dividends))):
-            has_all_attributes = True
-            for dividend_condition in MONITORED_CONDITIONS_DIVIDENDS:
-                if dividend_condition not in dividend:
-                    has_all_attributes = False
-            if not has_all_attributes:
-                del dividends[i]
-            elif dividend["amountPerShare"] == 0:
-                del dividends[i]
-
-        # Sort dividends by payment date
-        dividends = sorted(dividends, key=lambda d: d["paymentDate"])
-
-        # Get today's date
-        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-
-        # Loop over data
-        i = 0
-        for dividend in dividends:
-            paymentDate = datetime.strptime(dividend["paymentDate"], "%Y-%m-%d")
-            if paymentDate >= today:
-                for dividend_condition in MONITORED_CONDITIONS_DIVIDENDS:
-                    attribute = "dividend{}_{}".format(i, dividend_condition)
-                    self._state_attributes[attribute] = dividend[dividend_condition]
-                i += 1
+            if dividend_condition not in dividend:
+                continue
+            attribute = "dividend_{}".format(dividend_condition)
+            self._state_attributes[attribute] = dividend[dividend_condition]

@@ -1,5 +1,5 @@
 """Constants for avanza_stock."""
-__version__ = "1.1.1"
+__version__ = "1.1.2"
 
 DEFAULT_NAME = "Avanza Stock"
 
@@ -66,8 +66,9 @@ MONITORED_CONDITIONS_COMPANY = [
 MONITORED_CONDITIONS += MONITORED_CONDITIONS_COMPANY
 
 MONITORED_CONDITIONS_DIVIDENDS = [
-    "amountPerShare",
+    "amount",
     "exDate",
+    "exDateStatus",
     "paymentDate",
 ]
 
