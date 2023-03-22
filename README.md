@@ -142,6 +142,7 @@ sensor:
 
 ## Changelog
 
+- 1.2.0  - Support ETF
 - 1.1.2  - Fix dividend
 - 1.1.1  - Fix historical changes
 - 1.1.0  - Use the new api
