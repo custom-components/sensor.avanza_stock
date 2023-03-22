@@ -220,6 +220,8 @@ class AvanzaStockSensor(SensorEntity):
     async def async_update(self):
         """Update state and attributes."""
         data = await pyavanza.get_stock_async(self._session, self._stock)
+        if data["type"] == pyavanza.InstrumentType.ExchangeTradedFund:
+            data = await pyavanza.get_etf_async(self._session, self._stock)
         data_conversion_currency = None
         if self._conversion_currency:
             data_conversion_currency = await pyavanza.get_stock_async(
