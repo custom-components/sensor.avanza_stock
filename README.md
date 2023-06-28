@@ -52,7 +52,7 @@ key | type | description
 
 ### Monitored conditions
 
-If no `monitored_conditions` is defined, change, changePercent and name will be tracked. Full list of available attributes, see [here](custom_components/avanza_stock/const.py#L12) (With the new api change only change and changePercent is currently supported.)
+If no `monitored_conditions` is defined, change, changePercent and name will be tracked. Full list of available attributes, see [here](custom_components/avanza_stock/const.py#L12) (With the new api change only change and changePercent is currently supported.) Note that the data from the api is not realtime but lagging behind by 15 minutes.
 
 ### Finding stock or conversion currency
 
