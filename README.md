@@ -116,6 +116,19 @@ sensor:
         invert_conversion_currency: true
 ```
 
+**Configuration with untrackable stock, use id 0 and the purchase_price will be the current state:**
+
+```yaml
+sensor:
+  - platform: avanza_stock
+    stock:
+      - id: 0
+        name: MY STOCK
+        shares: 1
+        purchase_price: 600
+        currency: SEK
+```
+
 ## Usage
 
 **Automation to send summary at 18:00 using telegram:**
@@ -142,6 +155,7 @@ sensor:
 
 ## Changelog
 
+- 1.3.0  - Support manual stock, i.e. not on avanza
 - 1.2.0  - Support ETF
 - 1.1.2  - Fix dividend
 - 1.1.1  - Fix historical changes

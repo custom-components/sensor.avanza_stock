@@ -205,7 +205,7 @@ class AvanzaStockSensor(SensorEntity):
     @property
     def unique_id(self):
         """Return the unique id."""
-        return f"{self._stock}_stock"
+        return f"{self._stock}_{self._name}_stock"
 
     @property
     def state_class(self):
@@ -219,14 +219,38 @@ class AvanzaStockSensor(SensorEntity):
 
     async def async_update(self):
         """Update state and attributes."""
-        data = await pyavanza.get_stock_async(self._session, self._stock)
-        if data["type"] == pyavanza.InstrumentType.ExchangeTradedFund:
-            data = await pyavanza.get_etf_async(self._session, self._stock)
         data_conversion_currency = None
-        if self._conversion_currency:
-            data_conversion_currency = await pyavanza.get_stock_async(
-                self._session, self._conversion_currency
-            )
+        if self._stock == 0:  # Non trackable, i.e. manual
+            data = {
+                "name": self._name.split(" ", 1)[1],
+                "unit_of_measurement": self._currency,
+                "quote": {
+                    "last": self._purchase_price,
+                    "change": 0,
+                    "changePercent": 0,
+                },
+                "historicalClosingPrices": {
+                    "oneWeek": self._purchase_price,
+                    "oneMonth": self._purchase_price,
+                    "threeMonths": self._purchase_price,
+                    "oneYear": self._purchase_price,
+                    "threeYears": self._purchase_price,
+                    "fiveYears": self._purchase_price,
+                    "tenYears": self._purchase_price,
+                    "startOfYear": self._purchase_price,
+                },
+                "listing": {
+                    "currency": self._currency,
+                },
+            }
+        else:
+            data = await pyavanza.get_stock_async(self._session, self._stock)
+            if data["type"] == pyavanza.InstrumentType.ExchangeTradedFund:
+                data = await pyavanza.get_etf_async(self._session, self._stock)
+            if self._conversion_currency:
+                data_conversion_currency = await pyavanza.get_stock_async(
+                    self._session, self._conversion_currency
+                )
         if data:
             self._update_state(data)
             self._update_unit_of_measurement(data)
