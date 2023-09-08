@@ -276,6 +276,8 @@ class AvanzaStockSensor(SensorEntity):
                 self._update_quote(data, condition)
             elif condition == "dividends":
                 self._update_dividends(data)
+            elif condition == "id":
+                self._state_attributes[condition] = data.get("orderbookId", None)
             else:
                 self._state_attributes[condition] = data.get(condition, None)
 
