@@ -11,8 +11,6 @@ CONF_CONVERSION_CURRENCY = "conversion_currency"
 CONF_INVERT_CONVERSION_CURRENCY = "invert_conversion_currency"
 
 MONITORED_CONDITIONS = [
-    "change",
-    "changePercent",
     "country",
     "currency",
     "dividends",
@@ -42,8 +40,6 @@ MONITORED_CONDITIONS = [
     "quoteUpdated",
     "shortSellable",
     "superLoan",
-    "totalValueTraded",
-    "totalVolumeTraded",
     "tradable",
 ]
 
@@ -85,7 +81,10 @@ MONITORED_CONDITIONS_DEFAULT = [
 MONITORED_CONDITIONS_QUOTE = [
     "change",
     "changePercent",
+    "totalValueTraded",
+    "totalVolumeTraded",
 ]
+MONITORED_CONDITIONS += MONITORED_CONDITIONS_QUOTE
 
 CHANGE_PRICE_MAPPING = [
     ("changeOneWeek", "oneWeek"),
