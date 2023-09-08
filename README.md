@@ -11,6 +11,13 @@
 _Custom component to get stock data from [Avanza](https://www.avanza.se) for
 [Home Assistant](https://www.home-assistant.io/)._
 
+## Note
+
+The api changed recently, I'm trying to keep as much as possible working but some
+attributes may still not work. Please open an issues if you find something. The
+plan for the future is to create a new component that should be merged to
+homeassitant core.
+
 ## Installation
 
 - The easiest way is to install it with [HACS](https://hacs.xyz/). First install
