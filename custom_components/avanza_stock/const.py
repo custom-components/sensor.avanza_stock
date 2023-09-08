@@ -29,13 +29,6 @@ MONITORED_CONDITIONS = [
     "name",
     "numberOfOwners",
     "orderDepthReceivedTime",
-    "priceAtStartOfYear",
-    "priceFiveYearsAgo",
-    "priceOneMonthAgo",
-    "priceOneWeekAgo",
-    "priceOneYearAgo",
-    "priceThreeMonthsAgo",
-    "priceThreeYearsAgo",
     "pushPermitted",
     "quoteUpdated",
     "shortSellable",
@@ -85,6 +78,27 @@ MONITORED_CONDITIONS_QUOTE = [
     "totalVolumeTraded",
 ]
 MONITORED_CONDITIONS += MONITORED_CONDITIONS_QUOTE
+
+MONITORED_CONDITIONS_PRICE = [
+    "priceAtStartOfYear",
+    "priceFiveYearsAgo",
+    "priceOneMonthAgo",
+    "priceOneWeekAgo",
+    "priceOneYearAgo",
+    "priceThreeMonthsAgo",
+    "priceThreeYearsAgo",
+]
+MONITORED_CONDITIONS += MONITORED_CONDITIONS_PRICE
+
+PRICE_MAPPING = {
+    "priceAtStartOfYear": "startOfYear",
+    "priceFiveYearsAgo": "fiveYears",
+    "priceOneMonthAgo": "oneMonth",
+    "priceOneWeekAgo": "oneWeek",
+    "priceOneYearAgo": "oneYear",
+    "priceThreeMonthsAgo": "rhreeMonths",
+    "priceThreeYearsAgo": "rhreeYears",
+}
 
 CHANGE_PRICE_MAPPING = [
     ("changeOneWeek", "oneWeek"),
