@@ -16,7 +16,6 @@ MONITORED_CONDITIONS = [
     "country",
     "currency",
     "dividends",
-    "flagCode",
     "hasInvestmentFees",
     "highestPrice",
     "id",
@@ -27,7 +26,6 @@ MONITORED_CONDITIONS = [
     "lowestPrice",
     "marketList",
     "marketMakerExpected",
-    "marketPlace",
     "marketTrades",
     "morningStarFactSheetUrl",
     "name",
@@ -44,7 +42,6 @@ MONITORED_CONDITIONS = [
     "quoteUpdated",
     "shortSellable",
     "superLoan",
-    "tickerSymbol",
     "totalValueTraded",
     "totalVolumeTraded",
     "tradable",
@@ -56,6 +53,13 @@ MONITORED_CONDITIONS_KEYRATIOS = [
     "volatility",
 ]
 MONITORED_CONDITIONS += MONITORED_CONDITIONS_KEYRATIOS
+
+MONITORED_CONDITIONS_LISTING = [
+    "tickerSymbol",
+    "marketPlace",
+    "flagCode",
+]
+MONITORED_CONDITIONS += MONITORED_CONDITIONS_LISTING
 
 MONITORED_CONDITIONS_COMPANY = [
     "description",
