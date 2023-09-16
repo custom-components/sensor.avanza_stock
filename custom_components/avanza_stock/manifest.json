@@ -1,11 +1,15 @@
 {
-    "domain": "avanza_stock",
-    "name": "Avanza Stock",
-    "codeowners": ["@claha"],
-    "dependencies": [],
-    "documentation": "https://github.com/custom-components/sensor.avanza_stock",
-    "iot_class": "cloud_polling",
-    "issue_tracker": "https://github.com/custom-components/sensor.avanza_stock/issues",
-    "requirements": ["pyavanza==0.6.0"],
-    "version": "1.4.0"
+  "domain": "avanza_stock",
+  "name": "Avanza Stock",
+  "codeowners": [
+    "@claha"
+  ],
+  "dependencies": [],
+  "documentation": "https://github.com/custom-components/sensor.avanza_stock",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/custom-components/sensor.avanza_stock/issues",
+  "requirements": [
+    "pyavanza==0.6.0"
+  ],
+  "version": "1.4.0"
 }
