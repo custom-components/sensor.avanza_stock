@@ -27,10 +27,8 @@ jobs:
     runs-on: "ubuntu-latest"
     name: Check style formatting
     steps:
-      - uses: "actions/checkout@v4"
-      - uses: "actions/setup-python@v4"
+      - uses: actions/checkout@v4.0.0
+      - uses: actions/setup-python@v4.7.0
         with:
-          python-version: "3.x"
-      - run: pip install pre-commit==2.9.3
-      - run: pre-commit run --all-files
-      - run: if git ls-files | xargs file | grep CRLF; then exit 1; fi
+          python-version: 3.x
+      - uses: pre-commit/action@v3.0.0
