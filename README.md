@@ -162,6 +162,7 @@ sensor:
 
 ## Changelog
 
+- 1.5.0  - Use latest pyavana with latest api changes
 - 1.4.0  - Fix more attributes (dure to api changes)
 - 1.3.0  - Support manual stock, i.e. not on avanza
 - 1.2.0  - Support ETF
