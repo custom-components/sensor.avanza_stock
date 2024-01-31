@@ -162,6 +162,7 @@ sensor:
 
 ## Changelog
 
+- 1.5.2  - Add minimum home-assistant version
 - 1.5.1  - Bump pyavanza (becuase of aiohttp)
 - 1.5.0  - Use latest pyavana with latest api changes
 - 1.4.0  - Fix more attributes (dure to api changes)
