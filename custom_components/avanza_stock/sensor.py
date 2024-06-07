@@ -294,7 +294,7 @@ class AvanzaStockSensor(SensorEntity):
                         self._state_attributes[change] = round(
                             data["quote"]["last"]
                             - data["historicalClosingPrices"][price],
-                            2,
+                            5,
                         )
                     else:
                         self._state_attributes[change] = "unknown"
@@ -308,7 +308,7 @@ class AvanzaStockSensor(SensorEntity):
                                     data["quote"]["last"]
                                     - data["historicalClosingPrices"][price]
                                 ),
-                                2,
+                                5,
                             )
                         else:
                             self._state_attributes[change] = "unknown"
@@ -323,7 +323,7 @@ class AvanzaStockSensor(SensorEntity):
                                 - data["historicalClosingPrices"][price]
                             )
                             / data["historicalClosingPrices"][price],
-                            2,
+                            3,
                         )
                     else:
                         self._state_attributes[change] = "unknown"
@@ -331,10 +331,10 @@ class AvanzaStockSensor(SensorEntity):
         if self._shares is not None:
             self._state_attributes["shares"] = self._shares
             self._state_attributes["totalValue"] = round(
-                self._shares * data["quote"]["last"], 2
+                self._shares * data["quote"]["last"], 5
             )
             self._state_attributes["totalChange"] = round(
-                self._shares * data["quote"]["change"], 2
+                self._shares * data["quote"]["change"], 5
             )
 
         self._update_profit_loss(data["quote"]["last"])
@@ -370,22 +370,22 @@ class AvanzaStockSensor(SensorEntity):
         if self._purchase_price is not None:
             self._state_attributes["purchasePrice"] = self._purchase_price
             self._state_attributes["profitLoss"] = round(
-                price - self._purchase_price, 2
+                price - self._purchase_price, 5
             )
             self._state_attributes["profitLossPercentage"] = round(
-                100 * (price - self._purchase_price) / self._purchase_price, 2
+                100 * (price - self._purchase_price) / self._purchase_price, 3
             )
 
             if self._shares is not None:
                 self._state_attributes["totalProfitLoss"] = round(
-                    self._shares * (price - self._purchase_price), 2
+                    self._shares * (price - self._purchase_price), 5
                 )
 
     def _update_conversion_rate(self, data):
         rate = data["quote"]["last"]
         if self._invert_conversion_currency:
             rate = 1.0 / rate
-        self._state = round(self._state * rate, 2)
+        self._state = round(self._state * rate, 5)
         if self._invert_conversion_currency:
             self._unit_of_measurement = data["name"].split("/")[0]
         else:
@@ -397,7 +397,7 @@ class AvanzaStockSensor(SensorEntity):
                 and self._state_attributes[attribute] != "unknown"
             ):
                 self._state_attributes[attribute] = round(
-                    self._state_attributes[attribute] * rate, 2
+                    self._state_attributes[attribute] * rate, 5
                 )
         self._update_profit_loss(self._state)
 
