@@ -23,6 +23,7 @@ from homeassistant.const import (
     CONF_NAME,
 )
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
+from homeassistant.helpers.template import Template
 
 from custom_components.avanza_stock.const import (
     CHANGE_PERCENT_PRICE_MAPPING,
@@ -55,7 +56,10 @@ STOCK_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_ID): cv.positive_int,
         vol.Optional(CONF_NAME): cv.string,
-        vol.Optional(CONF_SHARES): vol.Coerce(float),
+        vol.Optional(CONF_SHARES): vol.Any(
+            vol.Coerce(float),
+            cv.template,
+        ),
         vol.Optional(CONF_PURCHASE_DATE): cv.string,
         vol.Optional(CONF_PURCHASE_PRICE): vol.Coerce(float),
         vol.Optional(CONF_CONVERSION_CURRENCY): cv.positive_int,
@@ -70,7 +74,10 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
             cv.positive_int, vol.All(cv.ensure_list, [STOCK_SCHEMA])
         ),
         vol.Optional(CONF_NAME): cv.string,
-        vol.Optional(CONF_SHARES): vol.Coerce(float),
+        vol.Optional(CONF_SHARES): vol.Any(
+            vol.Coerce(float),
+            cv.template,
+        ),
         vol.Optional(CONF_PURCHASE_DATE): cv.string,
         vol.Optional(CONF_PURCHASE_PRICE): vol.Coerce(float),
         vol.Optional(CONF_CONVERSION_CURRENCY): cv.positive_int,
@@ -92,6 +99,9 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     if isinstance(stock, int):
         name = config.get(CONF_NAME)
         shares = config.get(CONF_SHARES)
+        if isinstance(shares, Template):
+            shares.hass = hass
+            shares = shares.async_render()
         purchase_date = config.get(CONF_PURCHASE_DATE)
         purchase_price = config.get(CONF_PURCHASE_PRICE)
         conversion_currency = config.get(CONF_CONVERSION_CURRENCY)
@@ -122,6 +132,9 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
             if name is None:
                 name = DEFAULT_NAME + " " + str(id)
             shares = s.get(CONF_SHARES)
+            if isinstance(shares, Template):
+                shares.hass = hass
+                shares = shares.async_render()
             purchase_date = s.get(CONF_PURCHASE_DATE)
             purchase_price = s.get(CONF_PURCHASE_PRICE)
             conversion_currency = s.get(CONF_CONVERSION_CURRENCY)

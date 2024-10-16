@@ -1,5 +1,5 @@
 """Constants for avanza_stock."""
-__version__ = "1.5.3"
+__version__ = "1.6.0"
 
 DEFAULT_NAME = "Avanza Stock"
 

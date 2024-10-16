@@ -162,6 +162,7 @@ sensor:
 
 ## Changelog
 
+- 1.6.0  - Allow template for shares config
 - 1.5.3  - Less aggressive rounding
 - 1.5.2  - Add minimum home-assistant version
 - 1.5.1  - Bump pyavanza (becuase of aiohttp)
