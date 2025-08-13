@@ -25,6 +25,7 @@ from homeassistant.const import (
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
 from custom_components.avanza_stock.const import (
+    ATTR_TRENDING,
     CHANGE_PERCENT_PRICE_MAPPING,
     CHANGE_PRICE_MAPPING,
     CONF_CONVERSION_CURRENCY,
@@ -32,9 +33,11 @@ from custom_components.avanza_stock.const import (
     CONF_PURCHASE_DATE,
     CONF_PURCHASE_PRICE,
     CONF_SHARES,
+    CONF_SHOW_TRENDING_ICON,
     CONF_STOCK,
     CURRENCY_ATTRIBUTE,
     DEFAULT_NAME,
+    DEFAULT_SHOW_TRENDING_ICON,
     MONITORED_CONDITIONS,
     MONITORED_CONDITIONS_COMPANY,
     MONITORED_CONDITIONS_DEFAULT,
@@ -76,6 +79,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_CONVERSION_CURRENCY): cv.positive_int,
         vol.Optional(CONF_INVERT_CONVERSION_CURRENCY, default=False): cv.boolean,
         vol.Optional(CONF_CURRENCY): cv.string,
+        vol.Optional(CONF_SHOW_TRENDING_ICON, default=DEFAULT_SHOW_TRENDING_ICON): cv.boolean,
         vol.Optional(
             CONF_MONITORED_CONDITIONS, default=MONITORED_CONDITIONS_DEFAULT
         ): vol.All(cv.ensure_list, [vol.In(MONITORED_CONDITIONS)]),
@@ -87,6 +91,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     """Set up the Avanza Stock sensor."""
     session = async_create_clientsession(hass)
     monitored_conditions = config.get(CONF_MONITORED_CONDITIONS)
+    show_trending_icon = config.get(CONF_SHOW_TRENDING_ICON)
     stock = config.get(CONF_STOCK)
     entities = []
     if isinstance(stock, int):
@@ -112,6 +117,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                 currency,
                 monitored_conditions,
                 session,
+                show_trending_icon,
             )
         )
         _LOGGER.debug("Tracking %s [%d] using Avanza" % (name, stock))
@@ -140,6 +146,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                     currency,
                     monitored_conditions,
                     session,
+                    show_trending_icon,
                 )
             )
             _LOGGER.debug("Tracking %s [%d] using Avanza" % (name, id))
@@ -162,6 +169,7 @@ class AvanzaStockSensor(SensorEntity):
         currency,
         monitored_conditions,
         session,
+        show_trending_icon,
     ):
         """Initialize a Avanza Stock sensor."""
         self._hass = hass
@@ -175,10 +183,12 @@ class AvanzaStockSensor(SensorEntity):
         self._currency = currency
         self._monitored_conditions = monitored_conditions
         self._session = session
+        self._show_trending_icon = show_trending_icon
         self._icon = "mdi:cash"
         self._state = 0
         self._state_attributes = {}
         self._unit_of_measurement = ""
+        self._previous_close = None
 
     @property
     def name(self):
@@ -255,9 +265,28 @@ class AvanzaStockSensor(SensorEntity):
                     self._session, self._conversion_currency
                 )
         if data:
+            # Store previous close price for trending calculation
+            if "quote" in data and "last" in data["quote"] and self._stock != 0:
+                # Try to get previous close from historical data or use the change to calculate it
+                if "historicalClosingPrices" in data and data["historicalClosingPrices"]:
+                    # Use any available historical closing price as reference
+                    historical_prices = data["historicalClosingPrices"]
+                    for period in ["oneWeek", "oneMonth", "threeMonths", "startOfYear"]:
+                        if period in historical_prices and historical_prices[period] is not None:
+                            # For trending, we'll use current price vs previous close logic
+                            # Avanza API provides 'change' which is current - previous close
+                            change = data["quote"].get("change", 0)
+                            self._previous_close = data["quote"]["last"] - change
+                            break
+                elif self._previous_close is None and "change" in data["quote"]:
+                    # Calculate previous close from current price and change
+                    change = data["quote"].get("change", 0)
+                    self._previous_close = data["quote"]["last"] - change
+
             self._update_state(data)
             self._update_unit_of_measurement(data)
             self._update_state_attributes(data)
+            self._update_trending_and_icon(data)
             if data_conversion_currency:
                 self._update_conversion_rate(data_conversion_currency)
             if self._currency:
@@ -413,3 +442,30 @@ class AvanzaStockSensor(SensorEntity):
                 continue
             attribute = "dividend_{}".format(dividend_condition)
             self._state_attributes[attribute] = dividend[dividend_condition]
+
+    def _calc_trending_state(self) -> str | None:
+        """Return the trending state for the stock."""
+        if self._state is None or self._previous_close is None:
+            return None
+
+        if self._state > self._previous_close:
+            return "up"
+        if self._state < self._previous_close:
+            return "down"
+
+        return "neutral"
+
+    def _update_trending_and_icon(self, data):
+        """Update the trending state and icon based on price movement."""
+        trending_state = self._calc_trending_state()
+        
+        # Set trending attribute if we have a valid state
+        if trending_state is not None:
+            self._state_attributes[ATTR_TRENDING] = trending_state
+
+        # Set icon based on configuration and trending state
+        if trending_state is not None and self._show_trending_icon:
+            self._icon = f"mdi:trending-{trending_state}"
+        else:
+            # Fall back to default cash icon
+            self._icon = "mdi:cash"
