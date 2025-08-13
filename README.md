@@ -41,6 +41,7 @@ key | type | description
 **purchase_price (Optional)**              | number        | Price paid when stock was purchased (per share). Redundant if stock is defined as a list.
 **conversion_currency (Optional)**         | number        | Index id used for currency conversion, see [here](#finding-stock-or-conversion-currency).
 **monitored_conditions (Optional)**        | list          | Attributes to monitor, see [here](#monitored-conditions).
+**show_trending_icon (Optional)**          | boolean       | Show trending icons (up/down/neutral) instead of cash icon, default false.
 **invert_conversion_currency (Optional)** | boolean       | Wether or not to invert the conversion currency, default false.
 **currency (Optional)**                    | string        | Overwrite currency given by the api.
 
@@ -136,6 +137,18 @@ sensor:
         currency: SEK
 ```
 
+**Configuration with trending icons:**
+
+```yaml
+sensor:
+  - platform: avanza_stock
+    stock: 5361
+    show_trending_icon: true
+    monitored_conditions:
+      - change
+      - changePercent
+```
+
 ## Usage
 
 **Automation to send summary at 18:00 using telegram:**
@@ -162,6 +175,7 @@ sensor:
 
 ## Changelog
 
+- 1.5.4  - Add trend icons
 - 1.5.3  - Less aggressive rounding
 - 1.5.2  - Add minimum home-assistant version
 - 1.5.1  - Bump pyavanza (becuase of aiohttp)
