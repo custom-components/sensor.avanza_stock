@@ -47,9 +47,15 @@ class AvanzaStockConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     {
                         vol.Required(CONF_STOCK): int,
                         vol.Optional(CONF_NAME, default=DEFAULT_NAME): str,
-                        vol.Optional(CONF_SHARES): float,
+                        vol.Optional(CONF_SHARES): vol.All(
+                            vol.Coerce(float),
+                            vol.Range(min=0.000001, max=1000000)
+                        ),
                         vol.Optional(CONF_PURCHASE_DATE): str,
-                        vol.Optional(CONF_PURCHASE_PRICE): float,
+                        vol.Optional(CONF_PURCHASE_PRICE): vol.All(
+                            vol.Coerce(float),
+                            vol.Range(min=0.000001, max=1000000)
+                        ),
                         vol.Optional(CONF_CONVERSION_CURRENCY): int,
                         vol.Optional(
                             CONF_INVERT_CONVERSION_CURRENCY, default=False
@@ -59,6 +65,51 @@ class AvanzaStockConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         ): bool,
                     }
                 ),
+            )
+
+        # Validate the input
+        errors = {}
+        
+        # Validate stock ID
+        if user_input[CONF_STOCK] <= 0:
+            errors["base"] = "invalid_stock_id"
+        
+        # Validate shares if provided
+        if CONF_SHARES in user_input and user_input[CONF_SHARES] is not None:
+            if user_input[CONF_SHARES] <= 0:
+                errors["base"] = "invalid_shares"
+        
+        # Validate purchase price if provided
+        if CONF_PURCHASE_PRICE in user_input and user_input[CONF_PURCHASE_PRICE] is not None:
+            if user_input[CONF_PURCHASE_PRICE] <= 0:
+                errors["base"] = "invalid_purchase_price"
+        
+        if errors:
+            return self.async_show_form(
+                step_id="user",
+                data_schema=vol.Schema(
+                    {
+                        vol.Required(CONF_STOCK, default=user_input[CONF_STOCK]): int,
+                        vol.Optional(CONF_NAME, default=user_input.get(CONF_NAME, DEFAULT_NAME)): str,
+                        vol.Optional(CONF_SHARES, default=user_input.get(CONF_SHARES)): vol.All(
+                            vol.Coerce(float),
+                            vol.Range(min=0.000001, max=1000000)
+                        ),
+                        vol.Optional(CONF_PURCHASE_DATE, default=user_input.get(CONF_PURCHASE_DATE)): str,
+                        vol.Optional(CONF_PURCHASE_PRICE, default=user_input.get(CONF_PURCHASE_PRICE)): vol.All(
+                            vol.Coerce(float),
+                            vol.Range(min=0.000001, max=1000000)
+                        ),
+                        vol.Optional(CONF_CONVERSION_CURRENCY, default=user_input.get(CONF_CONVERSION_CURRENCY)): int,
+                        vol.Optional(
+                            CONF_INVERT_CONVERSION_CURRENCY, default=user_input.get(CONF_INVERT_CONVERSION_CURRENCY, False)
+                        ): bool,
+                        vol.Optional(
+                            CONF_SHOW_TRENDING_ICON, default=user_input.get(CONF_SHOW_TRENDING_ICON, DEFAULT_SHOW_TRENDING_ICON)
+                        ): bool,
+                    }
+                ),
+                errors=errors,
             )
 
         self._data = user_input
@@ -110,6 +161,65 @@ class AvanzaStockOptionsFlow(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Manage the options."""
         if user_input is not None:
+            # Validate the input
+            errors = {}
+            
+            # Validate shares if provided
+            if CONF_SHARES in user_input and user_input[CONF_SHARES] is not None:
+                if user_input[CONF_SHARES] <= 0:
+                    errors["base"] = "invalid_shares"
+            
+            # Validate purchase price if provided
+            if CONF_PURCHASE_PRICE in user_input and user_input[CONF_PURCHASE_PRICE] is not None:
+                if user_input[CONF_PURCHASE_PRICE] <= 0:
+                    errors["base"] = "invalid_purchase_price"
+            
+            if errors:
+                return self.async_show_form(
+                    step_id="init",
+                    data_schema=vol.Schema(
+                        {
+                            vol.Optional(
+                                CONF_SHARES,
+                                default=user_input.get(CONF_SHARES, self.config_entry.options.get(CONF_SHARES)),
+                            ): vol.All(
+                                vol.Coerce(float),
+                                vol.Range(min=0.000001, max=1000000)
+                            ),
+                            vol.Optional(
+                                CONF_PURCHASE_DATE,
+                                default=user_input.get(CONF_PURCHASE_DATE, self.config_entry.options.get(CONF_PURCHASE_DATE)),
+                            ): str,
+                            vol.Optional(
+                                CONF_PURCHASE_PRICE,
+                                default=user_input.get(CONF_PURCHASE_PRICE, self.config_entry.options.get(CONF_PURCHASE_PRICE)),
+                            ): vol.All(
+                                vol.Coerce(float),
+                                vol.Range(min=0.000001, max=1000000)
+                            ),
+                            vol.Optional(
+                                CONF_CONVERSION_CURRENCY,
+                                default=user_input.get(CONF_CONVERSION_CURRENCY, self.config_entry.options.get(CONF_CONVERSION_CURRENCY)),
+                            ): int,
+                            vol.Optional(
+                                CONF_INVERT_CONVERSION_CURRENCY,
+                                default=user_input.get(
+                                    CONF_INVERT_CONVERSION_CURRENCY, 
+                                    self.config_entry.options.get(CONF_INVERT_CONVERSION_CURRENCY, False)
+                                ),
+                            ): bool,
+                            vol.Optional(
+                                CONF_SHOW_TRENDING_ICON,
+                                default=user_input.get(
+                                    CONF_SHOW_TRENDING_ICON, 
+                                    self.config_entry.options.get(CONF_SHOW_TRENDING_ICON, DEFAULT_SHOW_TRENDING_ICON)
+                                ),
+                            ): bool,
+                        }
+                    ),
+                    errors=errors,
+                )
+            
             return self.async_create_entry(title="", data=user_input)
 
         return self.async_show_form(
@@ -119,7 +229,10 @@ class AvanzaStockOptionsFlow(config_entries.OptionsFlow):
                     vol.Optional(
                         CONF_SHARES,
                         default=self.config_entry.options.get(CONF_SHARES),
-                    ): float,
+                    ): vol.All(
+                        vol.Coerce(float),
+                        vol.Range(min=0.000001, max=1000000)
+                    ),
                     vol.Optional(
                         CONF_PURCHASE_DATE,
                         default=self.config_entry.options.get(CONF_PURCHASE_DATE),
@@ -127,7 +240,10 @@ class AvanzaStockOptionsFlow(config_entries.OptionsFlow):
                     vol.Optional(
                         CONF_PURCHASE_PRICE,
                         default=self.config_entry.options.get(CONF_PURCHASE_PRICE),
-                    ): float,
+                    ): vol.All(
+                        vol.Coerce(float),
+                        vol.Range(min=0.000001, max=1000000)
+                    ),
                     vol.Optional(
                         CONF_CONVERSION_CURRENCY,
                         default=self.config_entry.options.get(CONF_CONVERSION_CURRENCY),
