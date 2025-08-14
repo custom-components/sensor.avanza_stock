@@ -38,7 +38,9 @@
     },
     "error": {
       "cannot_connect": "Failed to connect to Avanza API",
-      "invalid_stock_id": "Invalid stock ID",
+      "invalid_stock_id": "Invalid stock ID - must be a positive number",
+      "invalid_shares": "Invalid shares - must be a positive number",
+      "invalid_purchase_price": "Invalid purchase price - must be a positive number",
       "unknown": "Unexpected error occurred"
     },
     "abort": {
