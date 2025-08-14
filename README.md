@@ -31,6 +31,25 @@ directory. As example, you will get the `sensor.py` file in the following path:
 
 ## Configuration
 
+### GUI Setup (Recommended - Home Assistant 2025.8+)
+
+1. Go to **Settings** → **Devices & Services**
+2. Click **Add Integration**
+3. Search for **"Avanza Stock"**
+4. Enter the required information:
+   - **Stock ID**: The Avanza stock ID (see [Finding Stock ID](#finding-stock-or-conversion-currency))
+   - **Sensor Name**: Optional custom name for the sensor
+   - **Number of Shares**: Optional number of shares you own
+   - **Purchase Date**: Optional date when you purchased the stock
+   - **Purchase Price**: Optional price you paid per share
+   - **Conversion Currency ID**: Optional currency conversion ID
+   - **Invert Conversion Currency**: Optional toggle for currency conversion
+   - **Show Trending Icon**: Optional toggle to show trending icons instead of cash icon
+
+5. Click **Submit** to create the sensor
+
+### YAML Configuration (Legacy - Still Supported)
+
 key | type | description
 :--- | :--- | :---
 **platform (Required)**                    | string        | `avanza_stock`
@@ -175,6 +194,7 @@ sensor:
 
 ## Changelog
 
+- 2.0.0  - **BREAKING CHANGE**: Convert to modern integration with GUI setup support. Requires Home Assistant 2025.8+. Legacy YAML configuration still supported.
 - 1.5.4  - Add trend icons
 - 1.5.3  - Less aggressive rounding
 - 1.5.2  - Add minimum home-assistant version
