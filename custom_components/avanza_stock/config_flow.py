@@ -70,11 +70,7 @@ class AvanzaStockConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                             vol.Coerce(float),
                             vol.Range(min=0.000001, max=1000000)
                         ),
-                        vol.Optional(CONF_PURCHASE_DATE): vol.All(
-                            str,
-                            vol.Length(min=0, max=10),
-                            vol.Custom(validate_date_format, msg="Date must be in YYYY-MM-DD format")
-                        ),
+                        vol.Optional(CONF_PURCHASE_DATE): str,
                         vol.Optional(CONF_PURCHASE_PRICE): vol.All(
                             vol.Coerce(float),
                             vol.Range(min=0.000001, max=1000000)
@@ -125,11 +121,7 @@ class AvanzaStockConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                             vol.Coerce(float),
                             vol.Range(min=0.000001, max=1000000)
                         ),
-                        vol.Optional(CONF_PURCHASE_DATE, default=user_input.get(CONF_PURCHASE_DATE)): vol.All(
-                            str,
-                            vol.Length(min=0, max=10),
-                            vol.Custom(validate_date_format, msg="Date must be in YYYY-MM-DD format")
-                        ),
+                        vol.Optional(CONF_PURCHASE_DATE, default=user_input.get(CONF_PURCHASE_DATE)): str,
                         vol.Optional(CONF_PURCHASE_PRICE, default=user_input.get(CONF_PURCHASE_PRICE)): vol.All(
                             vol.Coerce(float),
                             vol.Range(min=0.000001, max=1000000)
@@ -254,11 +246,7 @@ class AvanzaStockOptionsFlow(config_entries.OptionsFlow):
                             vol.Optional(
                                 CONF_PURCHASE_DATE,
                                 default=user_input.get(CONF_PURCHASE_DATE, self._get_default_value(CONF_PURCHASE_DATE)),
-                            ): vol.All(
-                                str,
-                                vol.Length(min=0, max=10),
-                                vol.Custom(validate_date_format, msg="Date must be in YYYY-MM-DD format")
-                            ),
+                            ): str,
                             vol.Optional(
                                 CONF_PURCHASE_PRICE,
                                 default=user_input.get(CONF_PURCHASE_PRICE, self._get_default_value(CONF_PURCHASE_PRICE)),
@@ -311,11 +299,7 @@ class AvanzaStockOptionsFlow(config_entries.OptionsFlow):
                     vol.Optional(
                         CONF_PURCHASE_DATE,
                         default=self._get_default_value(CONF_PURCHASE_DATE),
-                    ): vol.All(
-                        str,
-                        vol.Length(min=0, max=10),
-                        vol.Custom(validate_date_format, msg="Date must be in YYYY-MM-DD format")
-                    ),
+                    ): str,
                     vol.Optional(
                         CONF_PURCHASE_PRICE,
                         default=self._get_default_value(CONF_PURCHASE_PRICE),
