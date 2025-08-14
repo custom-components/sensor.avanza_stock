@@ -1,0 +1,37 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add Avanza Stock",
+        "description": "Enter the details for the stock you want to track.",
+        "data": {
+          "stock": "Stock ID",
+          "name": "Name",
+          "shares": "Number of Shares",
+          "purchase_date": "Purchase Date",
+          "purchase_price": "Purchase Price"
+        }
+      }
+    },
+    "error": {
+      "invalid_stock_id": "Invalid stock ID. Please enter a positive number.",
+      "unknown": "Unexpected error occurred."
+    },
+    "abort": {
+      "already_configured": "This stock is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Configure Avanza Stock",
+        "description": "Update the configuration for this stock.",
+        "data": {
+          "shares": "Number of Shares",
+          "purchase_date": "Purchase Date",
+          "purchase_price": "Purchase Price"
+        }
+      }
+    }
+  }
+}

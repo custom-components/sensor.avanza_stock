@@ -11,20 +11,19 @@ import homeassistant.helpers.config_validation as cv
 import pyavanza
 import voluptuous as vol
 from homeassistant.components.sensor import (
-    PLATFORM_SCHEMA,
     SensorDeviceClass,
     SensorEntity,
     SensorStateClass,
 )
 from homeassistant.const import (
     CONF_CURRENCY,
-    CONF_ID,
     CONF_MONITORED_CONDITIONS,
     CONF_NAME,
 )
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
 from custom_components.avanza_stock.const import (
+    ATTR_TRENDING,
     CHANGE_PERCENT_PRICE_MAPPING,
     CHANGE_PRICE_MAPPING,
     CONF_CONVERSION_CURRENCY,
@@ -32,9 +31,11 @@ from custom_components.avanza_stock.const import (
     CONF_PURCHASE_DATE,
     CONF_PURCHASE_PRICE,
     CONF_SHARES,
+    CONF_SHOW_TRENDING_ICON,
     CONF_STOCK,
     CURRENCY_ATTRIBUTE,
     DEFAULT_NAME,
+    DEFAULT_SHOW_TRENDING_ICON,
     MONITORED_CONDITIONS,
     MONITORED_CONDITIONS_COMPANY,
     MONITORED_CONDITIONS_DEFAULT,
@@ -51,99 +52,45 @@ _LOGGER = logging.getLogger(__name__)
 
 SCAN_INTERVAL = timedelta(minutes=60)
 
-STOCK_SCHEMA = vol.Schema(
-    {
-        vol.Required(CONF_ID): cv.positive_int,
-        vol.Optional(CONF_NAME): cv.string,
-        vol.Optional(CONF_SHARES): vol.Coerce(float),
-        vol.Optional(CONF_PURCHASE_DATE): cv.string,
-        vol.Optional(CONF_PURCHASE_PRICE): vol.Coerce(float),
-        vol.Optional(CONF_CONVERSION_CURRENCY): cv.positive_int,
-        vol.Optional(CONF_INVERT_CONVERSION_CURRENCY, default=False): cv.boolean,
-        vol.Optional(CONF_CURRENCY): cv.string,
-    }
-)
-
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_STOCK): vol.Any(
-            cv.positive_int, vol.All(cv.ensure_list, [STOCK_SCHEMA])
-        ),
-        vol.Optional(CONF_NAME): cv.string,
-        vol.Optional(CONF_SHARES): vol.Coerce(float),
-        vol.Optional(CONF_PURCHASE_DATE): cv.string,
-        vol.Optional(CONF_PURCHASE_PRICE): vol.Coerce(float),
-        vol.Optional(CONF_CONVERSION_CURRENCY): cv.positive_int,
-        vol.Optional(CONF_INVERT_CONVERSION_CURRENCY, default=False): cv.boolean,
-        vol.Optional(CONF_CURRENCY): cv.string,
-        vol.Optional(
-            CONF_MONITORED_CONDITIONS, default=MONITORED_CONDITIONS_DEFAULT
-        ): vol.All(cv.ensure_list, [vol.In(MONITORED_CONDITIONS)]),
-    }
-)
+# Configuration schema is now handled by config_flow.py
 
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
-    """Set up the Avanza Stock sensor."""
+async def async_setup_entry(hass, config_entry, async_add_entities):
+    """Set up the Avanza Stock sensor from a config entry."""
     session = async_create_clientsession(hass)
-    monitored_conditions = config.get(CONF_MONITORED_CONDITIONS)
-    stock = config.get(CONF_STOCK)
-    entities = []
-    if isinstance(stock, int):
-        name = config.get(CONF_NAME)
-        shares = config.get(CONF_SHARES)
-        purchase_date = config.get(CONF_PURCHASE_DATE)
-        purchase_price = config.get(CONF_PURCHASE_PRICE)
-        conversion_currency = config.get(CONF_CONVERSION_CURRENCY)
-        invert_conversion_currency = config.get(CONF_INVERT_CONVERSION_CURRENCY)
-        currency = config.get(CONF_CURRENCY)
-        if name is None:
-            name = DEFAULT_NAME + " " + str(stock)
-        entities.append(
-            AvanzaStockSensor(
-                hass,
-                stock,
-                name,
-                shares,
-                purchase_date,
-                purchase_price,
-                conversion_currency,
-                invert_conversion_currency,
-                currency,
-                monitored_conditions,
-                session,
-            )
-        )
-        _LOGGER.debug("Tracking %s [%d] using Avanza" % (name, stock))
-    else:
-        for s in stock:
-            id = s.get(CONF_ID)
-            name = s.get(CONF_NAME)
-            if name is None:
-                name = DEFAULT_NAME + " " + str(id)
-            shares = s.get(CONF_SHARES)
-            purchase_date = s.get(CONF_PURCHASE_DATE)
-            purchase_price = s.get(CONF_PURCHASE_PRICE)
-            conversion_currency = s.get(CONF_CONVERSION_CURRENCY)
-            invert_conversion_currency = s.get(CONF_INVERT_CONVERSION_CURRENCY)
-            currency = s.get(CONF_CURRENCY)
-            entities.append(
-                AvanzaStockSensor(
-                    hass,
-                    id,
-                    name,
-                    shares,
-                    purchase_date,
-                    purchase_price,
-                    conversion_currency,
-                    invert_conversion_currency,
-                    currency,
-                    monitored_conditions,
-                    session,
-                )
-            )
-            _LOGGER.debug("Tracking %s [%d] using Avanza" % (name, id))
-    async_add_entities(entities, True)
+    
+    # Get configuration from the config entry
+    config = config_entry.data
+    stock_id = config[CONF_STOCK]
+    name = config.get(CONF_NAME, f"{DEFAULT_NAME} {stock_id}")
+    shares = config.get(CONF_SHARES)
+    purchase_date = config.get(CONF_PURCHASE_DATE)
+    purchase_price = config.get(CONF_PURCHASE_PRICE)
+    
+    # Use default values for optional configurations
+    conversion_currency = config.get(CONF_CONVERSION_CURRENCY)
+    invert_conversion_currency = config.get(CONF_INVERT_CONVERSION_CURRENCY, False)
+    currency = config.get(CONF_CURRENCY)
+    monitored_conditions = config.get(CONF_MONITORED_CONDITIONS, MONITORED_CONDITIONS_DEFAULT)
+    show_trending_icon = config.get(CONF_SHOW_TRENDING_ICON, DEFAULT_SHOW_TRENDING_ICON)
+    
+    entity = AvanzaStockSensor(
+        hass,
+        stock_id,
+        name,
+        shares,
+        purchase_date,
+        purchase_price,
+        conversion_currency,
+        invert_conversion_currency,
+        currency,
+        monitored_conditions,
+        session,
+        show_trending_icon,
+    )
+    
+    _LOGGER.debug("Tracking %s [%d] using Avanza" % (name, stock_id))
+    async_add_entities([entity], True)
 
 
 class AvanzaStockSensor(SensorEntity):
@@ -162,6 +109,7 @@ class AvanzaStockSensor(SensorEntity):
         currency,
         monitored_conditions,
         session,
+        show_trending_icon,
     ):
         """Initialize a Avanza Stock sensor."""
         self._hass = hass
@@ -175,10 +123,12 @@ class AvanzaStockSensor(SensorEntity):
         self._currency = currency
         self._monitored_conditions = monitored_conditions
         self._session = session
+        self._show_trending_icon = show_trending_icon
         self._icon = "mdi:cash"
         self._state = 0
         self._state_attributes = {}
         self._unit_of_measurement = ""
+        self._previous_close = None
 
     @property
     def name(self):
@@ -255,9 +205,28 @@ class AvanzaStockSensor(SensorEntity):
                     self._session, self._conversion_currency
                 )
         if data:
+            # Store previous close price for trending calculation
+            if "quote" in data and "last" in data["quote"] and self._stock != 0:
+                # Try to get previous close from historical data or use the change to calculate it
+                if "historicalClosingPrices" in data and data["historicalClosingPrices"]:
+                    # Use any available historical closing price as reference
+                    historical_prices = data["historicalClosingPrices"]
+                    for period in ["oneWeek", "oneMonth", "threeMonths", "startOfYear"]:
+                        if period in historical_prices and historical_prices[period] is not None:
+                            # For trending, we'll use current price vs previous close logic
+                            # Avanza API provides 'change' which is current - previous close
+                            change = data["quote"].get("change", 0)
+                            self._previous_close = data["quote"]["last"] - change
+                            break
+                elif self._previous_close is None and "change" in data["quote"]:
+                    # Calculate previous close from current price and change
+                    change = data["quote"].get("change", 0)
+                    self._previous_close = data["quote"]["last"] - change
+
             self._update_state(data)
             self._update_unit_of_measurement(data)
             self._update_state_attributes(data)
+            self._update_trending_and_icon(data)
             if data_conversion_currency:
                 self._update_conversion_rate(data_conversion_currency)
             if self._currency:
@@ -413,3 +382,30 @@ class AvanzaStockSensor(SensorEntity):
                 continue
             attribute = "dividend_{}".format(dividend_condition)
             self._state_attributes[attribute] = dividend[dividend_condition]
+
+    def _calc_trending_state(self) -> str | None:
+        """Return the trending state for the stock."""
+        if self._state is None or self._previous_close is None:
+            return None
+
+        if self._state > self._previous_close:
+            return "up"
+        if self._state < self._previous_close:
+            return "down"
+
+        return "neutral"
+
+    def _update_trending_and_icon(self, data):
+        """Update the trending state and icon based on price movement."""
+        trending_state = self._calc_trending_state()
+        
+        # Set trending attribute if we have a valid state
+        if trending_state is not None:
+            self._state_attributes[ATTR_TRENDING] = trending_state
+
+        # Set icon based on configuration and trending state
+        if trending_state is not None and self._show_trending_icon:
+            self._icon = f"mdi:trending-{trending_state}"
+        else:
+            # Fall back to default cash icon
+            self._icon = "mdi:cash"

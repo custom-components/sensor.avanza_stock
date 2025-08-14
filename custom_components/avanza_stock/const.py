@@ -1,6 +1,7 @@
 """Constants for avanza_stock."""
 __version__ = "1.5.3"
 
+DOMAIN = "avanza_stock"
 DEFAULT_NAME = "Avanza Stock"
 
 CONF_STOCK = "stock"
@@ -9,6 +10,13 @@ CONF_PURCHASE_DATE = "purchase_date"
 CONF_PURCHASE_PRICE = "purchase_price"
 CONF_CONVERSION_CURRENCY = "conversion_currency"
 CONF_INVERT_CONVERSION_CURRENCY = "invert_conversion_currency"
+CONF_SHOW_TRENDING_ICON = "show_trending_icon"
+
+# Attribute keys for extra state attributes
+ATTR_TRENDING = "trending"
+
+# Default configuration values
+DEFAULT_SHOW_TRENDING_ICON = False
 
 MONITORED_CONDITIONS = [
     "country",

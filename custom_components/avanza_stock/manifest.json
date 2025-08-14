@@ -4,6 +4,7 @@
   "codeowners": [
     "@claha"
   ],
+  "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/custom-components/sensor.avanza_stock",
   "iot_class": "cloud_polling",
