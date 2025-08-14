@@ -64,7 +64,7 @@ If no `monitored_conditions` is defined, change, changePercent and name will be 
 
 ### Finding stock or conversion currency
 
-Got to [Avanza](https://www.avanza.se) and search for the stock you want to track. In the resulting url there is a number, this is the stock id needed for the configuration. Even though it is a Swedish bank it is possible to find stocks from the following countries: Sweden, USA, Denmark, Norway, Finland, Canada, Belgium, France, Italy, Netherlands, Portugal and Germany. To find conversion currencies search for example "USD/SEK" and look for the id in the resulting url. If you can not find your conversion try and search the reverse (NOK/SEK instead of SEK/NOK) and use the `invert_conversion_currency` to get your preffered currency.
+Go to [Avanza](https://www.avanza.se) and search for the stock you want to track. In the resulting url there is a number, this is the stock id needed for the configuration. Even though it is a Swedish bank it is possible to find stocks from the following countries: Sweden, USA, Denmark, Norway, Finland, Canada, Belgium, France, Italy, Netherlands, Portugal and Germany. To find conversion currencies search for example "USD/SEK" and look for the id in the resulting url. If you can not find your conversion try and search the reverse (NOK/SEK instead of SEK/NOK) and use the `invert_conversion_currency` to get your preffered currency.
 
 ## Example
 
