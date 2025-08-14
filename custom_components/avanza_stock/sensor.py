@@ -7,25 +7,24 @@ https://github.com/custom-components/sensor.avanza_stock/blob/master/README.md
 import logging
 from datetime import timedelta
 
+import homeassistant.helpers.config_validation as cv
 import pyavanza
+import voluptuous as vol
 from homeassistant.components.sensor import (
+    PLATFORM_SCHEMA,
     SensorDeviceClass,
     SensorEntity,
     SensorStateClass,
 )
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     CONF_CURRENCY,
     CONF_ID,
     CONF_MONITORED_CONDITIONS,
     CONF_NAME,
 )
-from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
-from .const import (
+from custom_components.avanza_stock.const import (
     ATTR_TRENDING,
     CHANGE_PERCENT_PRICE_MAPPING,
     CHANGE_PRICE_MAPPING,
@@ -39,7 +38,6 @@ from .const import (
     CURRENCY_ATTRIBUTE,
     DEFAULT_NAME,
     DEFAULT_SHOW_TRENDING_ICON,
-    DOMAIN,
     MONITORED_CONDITIONS,
     MONITORED_CONDITIONS_COMPANY,
     MONITORED_CONDITIONS_DEFAULT,
@@ -56,79 +54,53 @@ _LOGGER = logging.getLogger(__name__)
 
 SCAN_INTERVAL = timedelta(minutes=60)
 
+STOCK_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_ID): cv.positive_int,
+        vol.Optional(CONF_NAME): cv.string,
+        vol.Optional(CONF_SHARES): vol.Coerce(float),
+        vol.Optional(CONF_PURCHASE_DATE): cv.string,
+        vol.Optional(CONF_PURCHASE_PRICE): vol.Coerce(float),
+        vol.Optional(CONF_CONVERSION_CURRENCY): cv.positive_int,
+        vol.Optional(CONF_INVERT_CONVERSION_CURRENCY, default=False): cv.boolean,
+        vol.Optional(CONF_CURRENCY): cv.string,
+    }
+)
 
-async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up the Avanza Stock sensor from a config entry."""
+PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
+    {
+        vol.Required(CONF_STOCK): vol.Any(
+            cv.positive_int, vol.All(cv.ensure_list, [STOCK_SCHEMA])
+        ),
+        vol.Optional(CONF_NAME): cv.string,
+        vol.Optional(CONF_SHARES): vol.Coerce(float),
+        vol.Optional(CONF_PURCHASE_DATE): cv.string,
+        vol.Optional(CONF_PURCHASE_PRICE): vol.Coerce(float),
+        vol.Optional(CONF_CONVERSION_CURRENCY): cv.positive_int,
+        vol.Optional(CONF_INVERT_CONVERSION_CURRENCY, default=False): cv.boolean,
+        vol.Optional(CONF_CURRENCY): cv.string,
+        vol.Optional(CONF_SHOW_TRENDING_ICON, default=DEFAULT_SHOW_TRENDING_ICON): cv.boolean,
+        vol.Optional(
+            CONF_MONITORED_CONDITIONS, default=MONITORED_CONDITIONS_DEFAULT
+        ): vol.All(cv.ensure_list, [vol.In(MONITORED_CONDITIONS)]),
+    }
+)
+
+
+async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
+    """Set up the Avanza Stock sensor."""
     session = async_create_clientsession(hass)
-    
-    # Get config from the config entry
-    config = config_entry.data
-    options = config_entry.options
-    
-    # Merge config and options, with options taking precedence
-    stock_config = {**config, **options}
-    
-    stock_id = stock_config[CONF_STOCK]
-    name = stock_config.get(CONF_NAME, f"{DEFAULT_NAME} {stock_id}")
-    shares = stock_config.get(CONF_SHARES)
-    purchase_date = stock_config.get(CONF_PURCHASE_DATE)
-    purchase_price = stock_config.get(CONF_PURCHASE_PRICE)
-    conversion_currency = stock_config.get(CONF_CONVERSION_CURRENCY)
-    invert_conversion_currency = stock_config.get(CONF_INVERT_CONVERSION_CURRENCY, False)
-    currency = stock_config.get(CONF_CURRENCY)
-    show_trending_icon = stock_config.get(CONF_SHOW_TRENDING_ICON, DEFAULT_SHOW_TRENDING_ICON)
-    
-    # Use default monitored conditions
-    monitored_conditions = MONITORED_CONDITIONS_DEFAULT
-    
-    _LOGGER.debug("Setting up Avanza Stock sensor: %s (ID: %d)", name, stock_id)
-    _LOGGER.debug("Config: shares=%s, purchase_date=%s, purchase_price=%s", 
-                  shares, purchase_date, purchase_price)
-    
-    entity = AvanzaStockSensor(
-        hass,
-        stock_id,
-        name,
-        shares,
-        purchase_date,
-        purchase_price,
-        conversion_currency,
-        invert_conversion_currency,
-        currency,
-        monitored_conditions,
-        session,
-        show_trending_icon,
-    )
-    
-    async_add_entities([entity], True)
-    _LOGGER.debug("Successfully added Avanza Stock sensor: %s [%d]", name, stock_id)
-
-
-# Legacy platform setup for backward compatibility
-async def async_setup_platform(
-    hass: HomeAssistant,
-    config: ConfigType,
-    async_add_entities: AddEntitiesCallback,
-    discovery_info: DiscoveryInfoType | None = None,
-) -> None:
-    """Set up the Avanza Stock sensor platform (legacy)."""
-    session = async_create_clientsession(hass)
-    monitored_conditions = config.get(CONF_MONITORED_CONDITIONS, MONITORED_CONDITIONS_DEFAULT)
-    show_trending_icon = config.get(CONF_SHOW_TRENDING_ICON, DEFAULT_SHOW_TRENDING_ICON)
+    monitored_conditions = config.get(CONF_MONITORED_CONDITIONS)
+    show_trending_icon = config.get(CONF_SHOW_TRENDING_ICON)
     stock = config.get(CONF_STOCK)
     entities = []
-    
     if isinstance(stock, int):
         name = config.get(CONF_NAME)
         shares = config.get(CONF_SHARES)
         purchase_date = config.get(CONF_PURCHASE_DATE)
         purchase_price = config.get(CONF_PURCHASE_PRICE)
         conversion_currency = config.get(CONF_CONVERSION_CURRENCY)
-        invert_conversion_currency = config.get(CONF_INVERT_CONVERSION_CURRENCY, False)
+        invert_conversion_currency = config.get(CONF_INVERT_CONVERSION_CURRENCY)
         currency = config.get(CONF_CURRENCY)
         if name is None:
             name = DEFAULT_NAME + " " + str(stock)
@@ -159,7 +131,7 @@ async def async_setup_platform(
             purchase_date = s.get(CONF_PURCHASE_DATE)
             purchase_price = s.get(CONF_PURCHASE_PRICE)
             conversion_currency = s.get(CONF_CONVERSION_CURRENCY)
-            invert_conversion_currency = s.get(CONF_INVERT_CONVERSION_CURRENCY, False)
+            invert_conversion_currency = s.get(CONF_INVERT_CONVERSION_CURRENCY)
             currency = s.get(CONF_CURRENCY)
             entities.append(
                 AvanzaStockSensor(
@@ -178,7 +150,6 @@ async def async_setup_platform(
                 )
             )
             _LOGGER.debug("Tracking %s [%d] using Avanza" % (name, id))
-    
     async_add_entities(entities, True)
 
 
@@ -247,9 +218,7 @@ class AvanzaStockSensor(SensorEntity):
     @property
     def unique_id(self):
         """Return the unique id."""
-        # Use a more specific unique ID that includes the domain and stock ID
-        # This ensures proper grouping under the integration
-        return f"{DOMAIN}_{self._stock}"
+        return f"{self._stock}_{self._name}_stock"
 
     @property
     def state_class(self):
@@ -260,11 +229,6 @@ class AvanzaStockSensor(SensorEntity):
     def device_class(self):
         """Return the device class."""
         return SensorDeviceClass.MONETARY
-
-    @property
-    def should_poll(self):
-        """Return the polling state."""
-        return True
 
     async def async_update(self):
         """Update state and attributes."""
