@@ -26,6 +26,14 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
+# Currency options for conversion
+CURRENCY_OPTIONS = {
+    "SEK": None,  # Default, no conversion
+    "EUR": 18998,
+    "USD": 19000,
+    "GBP": 108703,
+}
+
 
 class AvanzaStockConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Avanza Stock."""
@@ -51,12 +59,14 @@ class AvanzaStockConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                             vol.Coerce(float),
                             vol.Range(min=0.000001, max=1000000)
                         ),
-                        vol.Optional(CONF_PURCHASE_DATE): str,
+                        vol.Optional(CONF_PURCHASE_DATE): str,  # This will be a date input in the frontend
                         vol.Optional(CONF_PURCHASE_PRICE): vol.All(
                             vol.Coerce(float),
                             vol.Range(min=0.000001, max=1000000)
                         ),
-                        vol.Optional(CONF_CONVERSION_CURRENCY): int,
+                        vol.Optional(CONF_CONVERSION_CURRENCY, default="SEK"): vol.In(
+                            list(CURRENCY_OPTIONS.keys())
+                        ),
                         vol.Optional(
                             CONF_INVERT_CONVERSION_CURRENCY, default=False
                         ): bool,
@@ -100,7 +110,9 @@ class AvanzaStockConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                             vol.Coerce(float),
                             vol.Range(min=0.000001, max=1000000)
                         ),
-                        vol.Optional(CONF_CONVERSION_CURRENCY, default=user_input.get(CONF_CONVERSION_CURRENCY)): int,
+                        vol.Optional(CONF_CONVERSION_CURRENCY, default=user_input.get(CONF_CONVERSION_CURRENCY, "SEK")): vol.In(
+                            list(CURRENCY_OPTIONS.keys())
+                        ),
                         vol.Optional(
                             CONF_INVERT_CONVERSION_CURRENCY, default=user_input.get(CONF_INVERT_CONVERSION_CURRENCY, False)
                         ): bool,
@@ -111,6 +123,10 @@ class AvanzaStockConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 ),
                 errors=errors,
             )
+
+        # Convert currency selection to actual ID for storage
+        currency_selection = user_input.get(CONF_CONVERSION_CURRENCY, "SEK")
+        user_input[CONF_CONVERSION_CURRENCY] = CURRENCY_OPTIONS[currency_selection]
 
         self._data = user_input
         return await self.async_step_confirm()
@@ -156,6 +172,15 @@ class AvanzaStockOptionsFlow(config_entries.OptionsFlow):
         """Initialize options flow."""
         self.config_entry = config_entry
 
+    def _get_currency_display_name(self, currency_id: int | None) -> str:
+        """Convert currency ID back to display name for the options form."""
+        if currency_id is None:
+            return "SEK"
+        for name, cid in CURRENCY_OPTIONS.items():
+            if cid == currency_id:
+                return name
+        return "SEK"  # Default fallback
+
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
@@ -189,7 +214,7 @@ class AvanzaStockOptionsFlow(config_entries.OptionsFlow):
                             vol.Optional(
                                 CONF_PURCHASE_DATE,
                                 default=user_input.get(CONF_PURCHASE_DATE, self.config_entry.options.get(CONF_PURCHASE_DATE)),
-                            ): str,
+                            ): str,  # This will be a date input in the frontend
                             vol.Optional(
                                 CONF_PURCHASE_PRICE,
                                 default=user_input.get(CONF_PURCHASE_PRICE, self.config_entry.options.get(CONF_PURCHASE_PRICE)),
@@ -200,7 +225,9 @@ class AvanzaStockOptionsFlow(config_entries.OptionsFlow):
                             vol.Optional(
                                 CONF_CONVERSION_CURRENCY,
                                 default=user_input.get(CONF_CONVERSION_CURRENCY, self.config_entry.options.get(CONF_CONVERSION_CURRENCY)),
-                            ): int,
+                            ): vol.In(
+                                list(CURRENCY_OPTIONS.keys())
+                            ),
                             vol.Optional(
                                 CONF_INVERT_CONVERSION_CURRENCY,
                                 default=user_input.get(
@@ -220,6 +247,10 @@ class AvanzaStockOptionsFlow(config_entries.OptionsFlow):
                     errors=errors,
                 )
             
+            # Convert currency selection to actual ID for storage
+            currency_selection = user_input.get(CONF_CONVERSION_CURRENCY, "SEK")
+            user_input[CONF_CONVERSION_CURRENCY] = CURRENCY_OPTIONS[currency_selection]
+            
             return self.async_create_entry(title="", data=user_input)
 
         return self.async_show_form(
@@ -236,7 +267,7 @@ class AvanzaStockOptionsFlow(config_entries.OptionsFlow):
                     vol.Optional(
                         CONF_PURCHASE_DATE,
                         default=self.config_entry.options.get(CONF_PURCHASE_DATE),
-                    ): str,
+                    ): str,  # This will be a date input in the frontend
                     vol.Optional(
                         CONF_PURCHASE_PRICE,
                         default=self.config_entry.options.get(CONF_PURCHASE_PRICE),
@@ -246,8 +277,10 @@ class AvanzaStockOptionsFlow(config_entries.OptionsFlow):
                     ),
                     vol.Optional(
                         CONF_CONVERSION_CURRENCY,
-                        default=self.config_entry.options.get(CONF_CONVERSION_CURRENCY),
-                    ): int,
+                        default=self._get_currency_display_name(self.config_entry.options.get(CONF_CONVERSION_CURRENCY)),
+                    ): vol.In(
+                        list(CURRENCY_OPTIONS.keys())
+                    ),
                     vol.Optional(
                         CONF_INVERT_CONVERSION_CURRENCY,
                         default=self.config_entry.options.get(
