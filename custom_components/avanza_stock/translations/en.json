@@ -1,0 +1,48 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Avanza Stock Configuration",
+        "description": "Configure your Avanza Stock sensor",
+        "data": {
+          "stock": "Stock ID",
+          "name": "Sensor Name",
+          "shares": "Number of Shares",
+          "purchase_date": "Purchase Date",
+          "purchase_price": "Purchase Price",
+          "conversion_currency": "Conversion Currency ID",
+          "invert_conversion_currency": "Invert Conversion Currency",
+          "show_trending_icon": "Show Trending Icon"
+        }
+      },
+      "confirm": {
+        "title": "Confirm Configuration",
+        "description": "Please confirm the configuration for {name} (Stock ID: {stock_id})"
+      }
+    },
+    "options": {
+      "step": {
+        "init": {
+          "title": "Avanza Stock Options",
+          "description": "Configure options for your Avanza Stock sensor",
+          "data": {
+            "shares": "Number of Shares",
+            "purchase_date": "Purchase Date",
+            "purchase_price": "Purchase Price",
+            "conversion_currency": "Conversion Currency ID",
+            "invert_conversion_currency": "Invert Conversion Currency",
+            "show_trending_icon": "Show Trending Icon"
+          }
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to Avanza API",
+      "invalid_stock_id": "Invalid stock ID",
+      "unknown": "Unexpected error occurred"
+    },
+    "abort": {
+      "already_configured": "This stock is already configured"
+    }
+  }
+}
