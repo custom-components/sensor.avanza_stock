@@ -247,7 +247,9 @@ class AvanzaStockSensor(SensorEntity):
     @property
     def unique_id(self):
         """Return the unique id."""
-        return f"{self._stock}_{self._name}_stock"
+        # Use a more specific unique ID that includes the domain and stock ID
+        # This ensures proper grouping under the integration
+        return f"{DOMAIN}_{self._stock}"
 
     @property
     def state_class(self):
@@ -258,6 +260,11 @@ class AvanzaStockSensor(SensorEntity):
     def device_class(self):
         """Return the device class."""
         return SensorDeviceClass.MONETARY
+
+    @property
+    def should_poll(self):
+        """Return the polling state."""
+        return True
 
     async def async_update(self):
         """Update state and attributes."""

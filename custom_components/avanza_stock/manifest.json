@@ -12,6 +12,5 @@
   "requirements": [
     "pyavanza==0.7.1"
   ],
-  "version": "2.0.0",
-  "integration_type": "device"
+  "version": "2.0.0"
 }
