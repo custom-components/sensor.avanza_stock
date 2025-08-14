@@ -40,9 +40,9 @@ directory. As example, you will get the `sensor.py` file in the following path:
    - **Stock ID**: The Avanza stock ID (see [Finding Stock ID](#finding-stock-or-conversion-currency))
    - **Sensor Name**: Optional custom name for the sensor
    - **Number of Shares**: Optional number of shares you own
-   - **Purchase Date**: Optional date when you purchased the stock
+   - **Purchase Date**: Optional date picker for when you purchased the stock
    - **Purchase Price**: Optional price you paid per share
-   - **Conversion Currency ID**: Optional currency conversion ID
+   - **Conversion Currency**: Optional currency conversion (SEK, EUR, USD, GBP)
    - **Invert Conversion Currency**: Optional toggle for currency conversion
    - **Show Trending Icon**: Optional toggle to show trending icons instead of cash icon
 
