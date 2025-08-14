@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from typing import Any
 
 import voluptuous as vol
@@ -34,6 +35,16 @@ CURRENCY_OPTIONS = {
     "GBP": 108703,
 }
 
+# Date validation regex
+DATE_REGEX = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+
+
+def validate_date_format(date_str: str) -> bool:
+    """Validate date format YYYY-MM-DD."""
+    if not date_str:
+        return True  # Empty dates are allowed
+    return bool(DATE_REGEX.match(date_str))
+
 
 class AvanzaStockConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Avanza Stock."""
@@ -59,7 +70,11 @@ class AvanzaStockConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                             vol.Coerce(float),
                             vol.Range(min=0.000001, max=1000000)
                         ),
-                        vol.Optional(CONF_PURCHASE_DATE): str,  # This will be a date input in the frontend
+                        vol.Optional(CONF_PURCHASE_DATE): vol.All(
+                            str,
+                            vol.Length(min=0, max=10),
+                            vol.Custom(validate_date_format, msg="Date must be in YYYY-MM-DD format")
+                        ),
                         vol.Optional(CONF_PURCHASE_PRICE): vol.All(
                             vol.Coerce(float),
                             vol.Range(min=0.000001, max=1000000)
@@ -94,6 +109,11 @@ class AvanzaStockConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if user_input[CONF_PURCHASE_PRICE] <= 0:
                 errors["base"] = "invalid_purchase_price"
         
+        # Validate purchase date format if provided
+        if CONF_PURCHASE_DATE in user_input and user_input[CONF_PURCHASE_DATE]:
+            if not validate_date_format(user_input[CONF_PURCHASE_DATE]):
+                errors["base"] = "invalid_date_format"
+        
         if errors:
             return self.async_show_form(
                 step_id="user",
@@ -105,7 +125,11 @@ class AvanzaStockConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                             vol.Coerce(float),
                             vol.Range(min=0.000001, max=1000000)
                         ),
-                        vol.Optional(CONF_PURCHASE_DATE, default=user_input.get(CONF_PURCHASE_DATE)): str,
+                        vol.Optional(CONF_PURCHASE_DATE, default=user_input.get(CONF_PURCHASE_DATE)): vol.All(
+                            str,
+                            vol.Length(min=0, max=10),
+                            vol.Custom(validate_date_format, msg="Date must be in YYYY-MM-DD format")
+                        ),
                         vol.Optional(CONF_PURCHASE_PRICE, default=user_input.get(CONF_PURCHASE_PRICE)): vol.All(
                             vol.Coerce(float),
                             vol.Range(min=0.000001, max=1000000)
@@ -181,6 +205,17 @@ class AvanzaStockOptionsFlow(config_entries.OptionsFlow):
                 return name
         return "SEK"  # Default fallback
 
+    def _get_default_value(self, key: str, fallback=None):
+        """Get default value from options first, then from data, then fallback."""
+        options_value = self.config_entry.options.get(key)
+        data_value = self.config_entry.data.get(key)
+        result = options_value if options_value is not None else data_value if data_value is not None else fallback
+        
+        _LOGGER.debug("Getting default value for %s: options=%s, data=%s, fallback=%s, result=%s", 
+                      key, options_value, data_value, fallback, result)
+        
+        return result
+
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
@@ -199,6 +234,11 @@ class AvanzaStockOptionsFlow(config_entries.OptionsFlow):
                 if user_input[CONF_PURCHASE_PRICE] <= 0:
                     errors["base"] = "invalid_purchase_price"
             
+            # Validate purchase date format if provided
+            if CONF_PURCHASE_DATE in user_input and user_input[CONF_PURCHASE_DATE]:
+                if not validate_date_format(user_input[CONF_PURCHASE_DATE]):
+                    errors["base"] = "invalid_date_format"
+            
             if errors:
                 return self.async_show_form(
                     step_id="init",
@@ -206,25 +246,29 @@ class AvanzaStockOptionsFlow(config_entries.OptionsFlow):
                         {
                             vol.Optional(
                                 CONF_SHARES,
-                                default=user_input.get(CONF_SHARES, self.config_entry.options.get(CONF_SHARES)),
+                                default=user_input.get(CONF_SHARES, self._get_default_value(CONF_SHARES)),
                             ): vol.All(
                                 vol.Coerce(float),
                                 vol.Range(min=0.000001, max=1000000)
                             ),
                             vol.Optional(
                                 CONF_PURCHASE_DATE,
-                                default=user_input.get(CONF_PURCHASE_DATE, self.config_entry.options.get(CONF_PURCHASE_DATE)),
-                            ): str,  # This will be a date input in the frontend
+                                default=user_input.get(CONF_PURCHASE_DATE, self._get_default_value(CONF_PURCHASE_DATE)),
+                            ): vol.All(
+                                str,
+                                vol.Length(min=0, max=10),
+                                vol.Custom(validate_date_format, msg="Date must be in YYYY-MM-DD format")
+                            ),
                             vol.Optional(
                                 CONF_PURCHASE_PRICE,
-                                default=user_input.get(CONF_PURCHASE_PRICE, self.config_entry.options.get(CONF_PURCHASE_PRICE)),
+                                default=user_input.get(CONF_PURCHASE_PRICE, self._get_default_value(CONF_PURCHASE_PRICE)),
                             ): vol.All(
                                 vol.Coerce(float),
                                 vol.Range(min=0.000001, max=1000000)
                             ),
                             vol.Optional(
                                 CONF_CONVERSION_CURRENCY,
-                                default=user_input.get(CONF_CONVERSION_CURRENCY, self.config_entry.options.get(CONF_CONVERSION_CURRENCY)),
+                                default=user_input.get(CONF_CONVERSION_CURRENCY, self._get_currency_display_name(self._get_default_value(CONF_CONVERSION_CURRENCY))),
                             ): vol.In(
                                 list(CURRENCY_OPTIONS.keys())
                             ),
@@ -232,14 +276,14 @@ class AvanzaStockOptionsFlow(config_entries.OptionsFlow):
                                 CONF_INVERT_CONVERSION_CURRENCY,
                                 default=user_input.get(
                                     CONF_INVERT_CONVERSION_CURRENCY, 
-                                    self.config_entry.options.get(CONF_INVERT_CONVERSION_CURRENCY, False)
+                                    self._get_default_value(CONF_INVERT_CONVERSION_CURRENCY, False)
                                 ),
                             ): bool,
                             vol.Optional(
                                 CONF_SHOW_TRENDING_ICON,
                                 default=user_input.get(
                                     CONF_SHOW_TRENDING_ICON, 
-                                    self.config_entry.options.get(CONF_SHOW_TRENDING_ICON, DEFAULT_SHOW_TRENDING_ICON)
+                                    self._get_default_value(CONF_SHOW_TRENDING_ICON, DEFAULT_SHOW_TRENDING_ICON)
                                 ),
                             ): bool,
                         }
@@ -259,37 +303,41 @@ class AvanzaStockOptionsFlow(config_entries.OptionsFlow):
                 {
                     vol.Optional(
                         CONF_SHARES,
-                        default=self.config_entry.options.get(CONF_SHARES),
+                        default=self._get_default_value(CONF_SHARES),
                     ): vol.All(
                         vol.Coerce(float),
                         vol.Range(min=0.000001, max=1000000)
                     ),
                     vol.Optional(
                         CONF_PURCHASE_DATE,
-                        default=self.config_entry.options.get(CONF_PURCHASE_DATE),
-                    ): str,  # This will be a date input in the frontend
+                        default=self._get_default_value(CONF_PURCHASE_DATE),
+                    ): vol.All(
+                        str,
+                        vol.Length(min=0, max=10),
+                        vol.Custom(validate_date_format, msg="Date must be in YYYY-MM-DD format")
+                    ),
                     vol.Optional(
                         CONF_PURCHASE_PRICE,
-                        default=self.config_entry.options.get(CONF_PURCHASE_PRICE),
+                        default=self._get_default_value(CONF_PURCHASE_PRICE),
                     ): vol.All(
                         vol.Coerce(float),
                         vol.Range(min=0.000001, max=1000000)
                     ),
                     vol.Optional(
                         CONF_CONVERSION_CURRENCY,
-                        default=self._get_currency_display_name(self.config_entry.options.get(CONF_CONVERSION_CURRENCY)),
+                        default=self._get_currency_display_name(self._get_default_value(CONF_CONVERSION_CURRENCY)),
                     ): vol.In(
                         list(CURRENCY_OPTIONS.keys())
                     ),
                     vol.Optional(
                         CONF_INVERT_CONVERSION_CURRENCY,
-                        default=self.config_entry.options.get(
+                        default=self._get_default_value(
                             CONF_INVERT_CONVERSION_CURRENCY, False
                         ),
                     ): bool,
                     vol.Optional(
                         CONF_SHOW_TRENDING_ICON,
-                        default=self.config_entry.options.get(
+                        default=self._get_default_value(
                             CONF_SHOW_TRENDING_ICON, DEFAULT_SHOW_TRENDING_ICON
                         ),
                     ): bool,

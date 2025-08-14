@@ -85,6 +85,10 @@ async def async_setup_entry(
     # Use default monitored conditions
     monitored_conditions = MONITORED_CONDITIONS_DEFAULT
     
+    _LOGGER.debug("Setting up Avanza Stock sensor: %s (ID: %d)", name, stock_id)
+    _LOGGER.debug("Config: shares=%s, purchase_date=%s, purchase_price=%s", 
+                  shares, purchase_date, purchase_price)
+    
     entity = AvanzaStockSensor(
         hass,
         stock_id,
@@ -101,7 +105,7 @@ async def async_setup_entry(
     )
     
     async_add_entities([entity], True)
-    _LOGGER.debug("Tracking %s [%d] using Avanza" % (name, stock_id))
+    _LOGGER.debug("Successfully added Avanza Stock sensor: %s [%d]", name, stock_id)
 
 
 # Legacy platform setup for backward compatibility

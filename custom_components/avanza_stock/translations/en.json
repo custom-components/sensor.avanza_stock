@@ -41,6 +41,7 @@
       "invalid_stock_id": "Invalid stock ID - must be a positive number",
       "invalid_shares": "Invalid shares - must be a positive number",
       "invalid_purchase_price": "Invalid purchase price - must be a positive number",
+      "invalid_date_format": "Invalid date format - must be YYYY-MM-DD",
       "unknown": "Unexpected error occurred"
     },
     "abort": {
