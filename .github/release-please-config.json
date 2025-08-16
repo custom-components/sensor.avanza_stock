@@ -1,0 +1,7 @@
+{
+  "release-type": "simple",
+  "package-name": "sensor-avanza-stock",
+  "extra-files": [
+    "custom_components/avanza_stock/manifest.json"
+  ]
+}
