@@ -4,6 +4,7 @@ Support for getting stock data from avanza.se.
 For more details about this platform, please refer to the documentation at
 https://github.com/custom-components/sensor.avanza_stock/blob/master/README.md
 """
+
 import logging
 from datetime import timedelta
 
