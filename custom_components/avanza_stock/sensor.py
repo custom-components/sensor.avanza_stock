@@ -79,7 +79,9 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_CONVERSION_CURRENCY): cv.positive_int,
         vol.Optional(CONF_INVERT_CONVERSION_CURRENCY, default=False): cv.boolean,
         vol.Optional(CONF_CURRENCY): cv.string,
-        vol.Optional(CONF_SHOW_TRENDING_ICON, default=DEFAULT_SHOW_TRENDING_ICON): cv.boolean,
+        vol.Optional(
+            CONF_SHOW_TRENDING_ICON, default=DEFAULT_SHOW_TRENDING_ICON
+        ): cv.boolean,
         vol.Optional(
             CONF_MONITORED_CONDITIONS, default=MONITORED_CONDITIONS_DEFAULT
         ): vol.All(cv.ensure_list, [vol.In(MONITORED_CONDITIONS)]),
@@ -268,11 +270,17 @@ class AvanzaStockSensor(SensorEntity):
             # Store previous close price for trending calculation
             if "quote" in data and "last" in data["quote"] and self._stock != 0:
                 # Try to get previous close from historical data or use the change to calculate it
-                if "historicalClosingPrices" in data and data["historicalClosingPrices"]:
+                if (
+                    "historicalClosingPrices" in data
+                    and data["historicalClosingPrices"]
+                ):
                     # Use any available historical closing price as reference
                     historical_prices = data["historicalClosingPrices"]
                     for period in ["oneWeek", "oneMonth", "threeMonths", "startOfYear"]:
-                        if period in historical_prices and historical_prices[period] is not None:
+                        if (
+                            period in historical_prices
+                            and historical_prices[period] is not None
+                        ):
                             # For trending, we'll use current price vs previous close logic
                             # Avanza API provides 'change' which is current - previous close
                             change = data["quote"].get("change", 0)
@@ -458,7 +466,7 @@ class AvanzaStockSensor(SensorEntity):
     def _update_trending_and_icon(self, data):
         """Update the trending state and icon based on price movement."""
         trending_state = self._calc_trending_state()
-        
+
         # Set trending attribute if we have a valid state
         if trending_state is not None:
             self._state_attributes[ATTR_TRENDING] = trending_state
