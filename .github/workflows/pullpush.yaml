@@ -13,7 +13,7 @@ jobs:
     runs-on: "ubuntu-latest"
     name: Validate
     steps:
-      - uses: "actions/checkout@v4"
+      - uses: "actions/checkout@v5.0.0"
 
       - name: HACS validation
         uses: "hacs/action@main"
@@ -27,7 +27,7 @@ jobs:
     runs-on: "ubuntu-latest"
     name: Check style formatting
     steps:
-      - uses: actions/checkout@v4.0.0
+      - uses: actions/checkout@v5.0.0
       - uses: actions/setup-python@v5.6.0
         with:
           python-version: 3.x
