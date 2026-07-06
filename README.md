@@ -175,6 +175,7 @@ sensor:
 
 ## Changelog
 
+- 1.6.0  - Use get async session instead of create async session
 - 1.5.4  - Add trend icons
 - 1.5.3  - Less aggressive rounding
 - 1.5.2  - Add minimum home-assistant version
